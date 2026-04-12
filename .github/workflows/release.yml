@@ -109,3 +109,9 @@ jobs:
         with:
           generate_release_notes: true
           files: artifacts/*
+
+      - name: Update major version tag
+        run: |
+          major="${GITHUB_REF_NAME%%.*}"
+          git tag -f "$major" "$GITHUB_REF_NAME"
+          git push origin "$major" --force
