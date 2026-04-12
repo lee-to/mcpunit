@@ -363,8 +363,8 @@ fn parse_env_arg(raw: &str) -> Result<(String, String), String> {
 /// Minimal dotenv parser: `KEY=VALUE` lines, `#` comments, blank lines
 /// skipped. Supports optional quoting (`KEY="VALUE"` or `KEY='VALUE'`).
 fn load_dotenv(path: &Path) -> Result<Vec<(String, String)>, String> {
-    let file = fs::File::open(path)
-        .map_err(|e| format!("could not open {}: {e}", path.display()))?;
+    let file =
+        fs::File::open(path).map_err(|e| format!("could not open {}: {e}", path.display()))?;
     let reader = std::io::BufReader::new(file);
     let mut entries = Vec::new();
     for (i, line) in reader.lines().enumerate() {

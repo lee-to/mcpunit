@@ -119,7 +119,7 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        base="${GITHUB_ACTION_REPOSITORY:-anthropic-contrib/mcpunit}"
+        base="${GITHUB_ACTION_REPOSITORY:-lee-to/mcpunit}"
         version="${{ inputs.version }}"
         target="${{ steps.detect.outputs.target }}"
         archive="${{ steps.detect.outputs.archive }}"

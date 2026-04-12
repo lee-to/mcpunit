@@ -40,6 +40,7 @@ allow = [
     "MPL-2.0",
     "CC0-1.0",
     "OpenSSL",
+    "CDLA-Permissive-2.0",
 ]
 exceptions = []
 
