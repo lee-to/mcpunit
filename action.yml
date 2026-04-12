@@ -1,10 +1,6 @@
 name: mcpunit
 author: Danil Shutsky <thecutcode@gmail.com>
-description: >-
-  Deterministic CI-first quality audit for MCP servers. Downloads a
-  prebuilt mcpunit binary from GitHub Releases, runs a test against a
-  local stdio or Streamable HTTP server, and emits JSON, SARIF, and
-  Markdown reports plus GitHub Action outputs.
+description: Deterministic CI-first quality audit for MCP servers with JSON, SARIF, and Markdown reports.
 
 branding:
   icon: shield
