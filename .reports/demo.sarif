@@ -1,0 +1,763 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "mcpunit",
+          "semanticVersion": "1.0.0",
+          "rules": [
+            {
+              "id": "duplicate_tool_names",
+              "name": "Duplicate tool names",
+              "shortDescription": {
+                "text": "Duplicate tool names"
+              },
+              "fullDescription": {
+                "text": "Tool names should be unique within one MCP server."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Tool names should be unique within one MCP server. Severity: error. Score impact: 20."
+              },
+              "properties": {
+                "tags": [
+                  "tools",
+                  "identity",
+                  "tool-identity",
+                  "metadata_hygiene",
+                  "conformance"
+                ],
+                "precision": "medium",
+                "problem.severity": "error",
+                "risk_category": "metadata_hygiene",
+                "bucket": "conformance",
+                "score_impact": 20
+              }
+            },
+            {
+              "id": "missing_tool_description",
+              "name": "Missing tool description",
+              "shortDescription": {
+                "text": "Missing tool description"
+              },
+              "fullDescription": {
+                "text": "Each tool should include a non-empty description."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Each tool should include a non-empty description. Severity: warning. Score impact: 10."
+              },
+              "properties": {
+                "tags": [
+                  "tools",
+                  "description",
+                  "tool-description",
+                  "metadata_hygiene",
+                  "metadata"
+                ],
+                "precision": "medium",
+                "problem.severity": "warning",
+                "risk_category": "metadata_hygiene",
+                "bucket": "metadata",
+                "score_impact": 10
+              }
+            },
+            {
+              "id": "overly_generic_tool_name",
+              "name": "Overly generic tool name",
+              "shortDescription": {
+                "text": "Overly generic tool name"
+              },
+              "fullDescription": {
+                "text": "Tool names should communicate behavior clearly."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Tool names should communicate behavior clearly. Severity: warning. Score impact: 10."
+              },
+              "properties": {
+                "tags": [
+                  "tools",
+                  "identity",
+                  "tool-identity",
+                  "metadata_hygiene",
+                  "ergonomics"
+                ],
+                "precision": "medium",
+                "problem.severity": "warning",
+                "risk_category": "metadata_hygiene",
+                "bucket": "ergonomics",
+                "score_impact": 10
+              }
+            },
+            {
+              "id": "vague_tool_description",
+              "name": "Vague tool description",
+              "shortDescription": {
+                "text": "Vague tool description"
+              },
+              "fullDescription": {
+                "text": "Tool descriptions should clearly explain what the tool does."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Tool descriptions should clearly explain what the tool does. Severity: warning. Score impact: 10."
+              },
+              "properties": {
+                "tags": [
+                  "tools",
+                  "description",
+                  "tool-description",
+                  "metadata_hygiene",
+                  "ergonomics"
+                ],
+                "precision": "medium",
+                "problem.severity": "warning",
+                "risk_category": "metadata_hygiene",
+                "bucket": "ergonomics",
+                "score_impact": 10
+              }
+            },
+            {
+              "id": "missing_schema_type",
+              "name": "Missing schema type",
+              "shortDescription": {
+                "text": "Missing schema type"
+              },
+              "fullDescription": {
+                "text": "Tool input schemas should declare a top-level type."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Tool input schemas should declare a top-level type. Severity: warning. Score impact: 10."
+              },
+              "properties": {
+                "tags": [
+                  "schema",
+                  "validation",
+                  "input-schema",
+                  "schema_hygiene",
+                  "conformance"
+                ],
+                "precision": "medium",
+                "problem.severity": "warning",
+                "risk_category": "schema_hygiene",
+                "bucket": "conformance",
+                "score_impact": 10
+              }
+            },
+            {
+              "id": "schema_allows_arbitrary_properties",
+              "name": "Schema allows arbitrary properties",
+              "shortDescription": {
+                "text": "Schema allows arbitrary properties"
+              },
+              "fullDescription": {
+                "text": "Tool input schemas should not allow arbitrary top-level properties."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Tool input schemas should not allow arbitrary top-level properties. Severity: warning. Score impact: 10."
+              },
+              "properties": {
+                "tags": [
+                  "schema",
+                  "validation",
+                  "input-schema",
+                  "schema_hygiene",
+                  "conformance"
+                ],
+                "precision": "medium",
+                "problem.severity": "warning",
+                "risk_category": "schema_hygiene",
+                "bucket": "conformance",
+                "score_impact": 10
+              }
+            },
+            {
+              "id": "weak_input_schema",
+              "name": "Weak input schema",
+              "shortDescription": {
+                "text": "Weak input schema"
+              },
+              "fullDescription": {
+                "text": "Tool input schemas should constrain free-form payloads clearly."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Tool input schemas should constrain free-form payloads clearly. Severity: warning. Score impact: 10."
+              },
+              "properties": {
+                "tags": [
+                  "schema",
+                  "validation",
+                  "input-schema",
+                  "schema_hygiene",
+                  "ergonomics"
+                ],
+                "precision": "medium",
+                "problem.severity": "warning",
+                "risk_category": "schema_hygiene",
+                "bucket": "ergonomics",
+                "score_impact": 10
+              }
+            },
+            {
+              "id": "missing_required_for_critical_fields",
+              "name": "Missing required critical fields",
+              "shortDescription": {
+                "text": "Missing required critical fields"
+              },
+              "fullDescription": {
+                "text": "Critical schema fields such as path, command, or URL should be required."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Critical schema fields such as path, command, or URL should be required. Severity: warning. Score impact: 10."
+              },
+              "properties": {
+                "tags": [
+                  "schema",
+                  "validation",
+                  "input-schema",
+                  "schema_hygiene",
+                  "conformance"
+                ],
+                "precision": "medium",
+                "problem.severity": "warning",
+                "risk_category": "schema_hygiene",
+                "bucket": "conformance",
+                "score_impact": 10
+              }
+            },
+            {
+              "id": "dangerous_exec_tool",
+              "name": "Dangerous execution tool",
+              "shortDescription": {
+                "text": "Dangerous execution tool"
+              },
+              "fullDescription": {
+                "text": "Tools that execute host shell commands are high risk."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Tools that execute host shell commands are high risk. Severity: error. Score impact: 20."
+              },
+              "properties": {
+                "tags": [
+                  "capability",
+                  "execution",
+                  "command_execution",
+                  "security"
+                ],
+                "precision": "medium",
+                "problem.severity": "error",
+                "risk_category": "command_execution",
+                "bucket": "security",
+                "score_impact": 20
+              }
+            },
+            {
+              "id": "dangerous_shell_download_exec",
+              "name": "Dangerous download-and-execute tool",
+              "shortDescription": {
+                "text": "Dangerous download-and-execute tool"
+              },
+              "fullDescription": {
+                "text": "Tools that combine remote download with shell execution are high risk."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Tools that combine remote download with shell execution are high risk. Severity: error. Score impact: 20."
+              },
+              "properties": {
+                "tags": [
+                  "capability",
+                  "execution",
+                  "network",
+                  "command_execution",
+                  "security"
+                ],
+                "precision": "medium",
+                "problem.severity": "error",
+                "risk_category": "command_execution",
+                "bucket": "security",
+                "score_impact": 20
+              }
+            },
+            {
+              "id": "dangerous_fs_write_tool",
+              "name": "Dangerous filesystem write tool",
+              "shortDescription": {
+                "text": "Dangerous filesystem write tool"
+              },
+              "fullDescription": {
+                "text": "Tools that write files on disk are high risk."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Tools that write files on disk are high risk. Severity: error. Score impact: 20."
+              },
+              "properties": {
+                "tags": [
+                  "capability",
+                  "filesystem",
+                  "file_system",
+                  "security"
+                ],
+                "precision": "medium",
+                "problem.severity": "error",
+                "risk_category": "file_system",
+                "bucket": "security",
+                "score_impact": 20
+              }
+            },
+            {
+              "id": "dangerous_fs_delete_tool",
+              "name": "Dangerous filesystem delete tool",
+              "shortDescription": {
+                "text": "Dangerous filesystem delete tool"
+              },
+              "fullDescription": {
+                "text": "Tools that delete files or directories are high risk."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Tools that delete files or directories are high risk. Severity: error. Score impact: 20."
+              },
+              "properties": {
+                "tags": [
+                  "capability",
+                  "filesystem",
+                  "destructive",
+                  "file_system",
+                  "security"
+                ],
+                "precision": "medium",
+                "problem.severity": "error",
+                "risk_category": "file_system",
+                "bucket": "security",
+                "score_impact": 20
+              }
+            },
+            {
+              "id": "dangerous_http_request_tool",
+              "name": "Dangerous HTTP request tool",
+              "shortDescription": {
+                "text": "Dangerous HTTP request tool"
+              },
+              "fullDescription": {
+                "text": "Tools that issue arbitrary HTTP requests are high risk."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Tools that issue arbitrary HTTP requests are high risk. Severity: error. Score impact: 20."
+              },
+              "properties": {
+                "tags": [
+                  "capability",
+                  "network",
+                  "http",
+                  "security"
+                ],
+                "precision": "medium",
+                "problem.severity": "error",
+                "risk_category": "network",
+                "bucket": "security",
+                "score_impact": 20
+              }
+            },
+            {
+              "id": "dangerous_network_tool",
+              "name": "Dangerous network tool",
+              "shortDescription": {
+                "text": "Dangerous network tool"
+              },
+              "fullDescription": {
+                "text": "Tools that expose generic network access are high risk."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Tools that expose generic network access are high risk. Severity: error. Score impact: 20."
+              },
+              "properties": {
+                "tags": [
+                  "capability",
+                  "network",
+                  "security"
+                ],
+                "precision": "medium",
+                "problem.severity": "error",
+                "risk_category": "network",
+                "bucket": "security",
+                "score_impact": 20
+              }
+            },
+            {
+              "id": "write_tool_without_scope_hint",
+              "name": "Write tool without scope hint",
+              "shortDescription": {
+                "text": "Write tool without scope hint"
+              },
+              "fullDescription": {
+                "text": "Filesystem mutation tools should document scope constraints clearly."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Filesystem mutation tools should document scope constraints clearly. Severity: warning. Score impact: 10."
+              },
+              "properties": {
+                "tags": [
+                  "capability",
+                  "filesystem",
+                  "scope",
+                  "external_side_effects",
+                  "ergonomics"
+                ],
+                "precision": "medium",
+                "problem.severity": "warning",
+                "risk_category": "external_side_effects",
+                "bucket": "ergonomics",
+                "score_impact": 10
+              }
+            },
+            {
+              "id": "tool_description_mentions_destructive_access",
+              "name": "Description mentions destructive access",
+              "shortDescription": {
+                "text": "Description mentions destructive access"
+              },
+              "fullDescription": {
+                "text": "Tool descriptions should make destructive broad-scope access easy to spot."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Tool descriptions should make destructive broad-scope access easy to spot. Severity: warning. Score impact: 10."
+              },
+              "properties": {
+                "tags": [
+                  "tools",
+                  "description",
+                  "destructive",
+                  "capability",
+                  "external_side_effects",
+                  "metadata"
+                ],
+                "precision": "medium",
+                "problem.severity": "warning",
+                "risk_category": "external_side_effects",
+                "bucket": "metadata",
+                "score_impact": 10
+              }
+            },
+            {
+              "id": "response_too_large",
+              "name": "Response too large",
+              "shortDescription": {
+                "text": "Response too large"
+              },
+              "fullDescription": {
+                "text": "MCP servers should keep discovery responses small so agent contexts stay usable."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "MCP servers should keep discovery responses small so agent contexts stay usable. Severity: warning. Score impact: 10."
+              },
+              "properties": {
+                "tags": [
+                  "transport",
+                  "size",
+                  "capability",
+                  "metadata_hygiene",
+                  "ergonomics"
+                ],
+                "precision": "medium",
+                "problem.severity": "warning",
+                "risk_category": "metadata_hygiene",
+                "bucket": "ergonomics",
+                "score_impact": 10
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "endTimeUtc": "2026-04-11T18:06:14.015630+00:00",
+          "workingDirectory": {
+            "uri": "file:///Users/macos/Projects/2080/mcpunit"
+          }
+        }
+      ],
+      "properties": {
+        "product_name": "mcpunit",
+        "tool_name": "mcpunit",
+        "report_schema_id": "https://mcpunit.cutcode.dev/schema/audit/v1",
+        "report_schema_version": "1",
+        "scan_timestamp": "2026-04-11T18:06:14.015630+00:00",
+        "total_score": 10,
+        "category_scores": {
+          "conformance": {
+            "score": 90,
+            "max_score": 100,
+            "penalty_points": 10,
+            "finding_count": 1
+          },
+          "security": {
+            "score": 60,
+            "max_score": 100,
+            "penalty_points": 40,
+            "finding_count": 2
+          },
+          "ergonomics": {
+            "score": 60,
+            "max_score": 100,
+            "penalty_points": 40,
+            "finding_count": 4
+          },
+          "metadata": {
+            "score": 100,
+            "max_score": 100,
+            "penalty_points": 0,
+            "finding_count": 0
+          }
+        },
+        "why_this_score": "Score is driven mainly by security findings in command execution and file system and ergonomics findings.",
+        "limitations": [
+          "Low score means more deterministic findings or higher-risk exposed surface, not malicious intent.",
+          "High score means fewer deterministic findings, not a guarantee of safety."
+        ]
+      },
+      "results": [
+        {
+          "ruleId": "overly_generic_tool_name",
+          "ruleIndex": 2,
+          "level": "warning",
+          "message": {
+            "text": "Tool 'do_it' uses an overly generic name that hides its behavior."
+          },
+          "partialFingerprints": {
+            "primaryLocationLineHash": "a976a68299b62c7090e787318096d8504279d18e5cc66af76ab1f58bdfc516c1"
+          },
+          "properties": {
+            "risk_category": "metadata_hygiene",
+            "bucket": "ergonomics",
+            "score_impact": 10,
+            "tool_name": "do_it",
+            "finding_category": "tool-identity",
+            "evidence": [
+              "tool_name='do_it'"
+            ],
+            "check_title": "Overly generic tool name",
+            "check_rationale": "Tool names should communicate behavior clearly."
+          },
+          "rule": {
+            "id": "overly_generic_tool_name"
+          }
+        },
+        {
+          "ruleId": "vague_tool_description",
+          "ruleIndex": 3,
+          "level": "warning",
+          "message": {
+            "text": "Tool 'do_it' uses a vague description that does not explain its behavior clearly."
+          },
+          "partialFingerprints": {
+            "primaryLocationLineHash": "5243cb66d02b4c459204df691447b11559f41549ccc6c526f43c1cc14fd5f46f"
+          },
+          "properties": {
+            "risk_category": "metadata_hygiene",
+            "bucket": "ergonomics",
+            "score_impact": 10,
+            "tool_name": "do_it",
+            "finding_category": "tool-description",
+            "evidence": [
+              "description='Helps with stuff.'",
+              "word_count=3",
+              "matched_phrase='helps with stuff'"
+            ],
+            "check_title": "Vague tool description",
+            "check_rationale": "Tool descriptions should clearly explain what the tool does."
+          },
+          "rule": {
+            "id": "vague_tool_description"
+          }
+        },
+        {
+          "ruleId": "schema_allows_arbitrary_properties",
+          "ruleIndex": 5,
+          "level": "warning",
+          "message": {
+            "text": "Tool 'debug_payload' allows arbitrary additional input properties."
+          },
+          "partialFingerprints": {
+            "primaryLocationLineHash": "94667d7f2f7db50f6e429256fb87144ffe340f921a438a3ea4597965cc8f5e8d"
+          },
+          "properties": {
+            "risk_category": "schema_hygiene",
+            "bucket": "conformance",
+            "score_impact": 10,
+            "tool_name": "debug_payload",
+            "finding_category": "input-schema",
+            "evidence": [
+              "additionalProperties=True",
+              "property_count=0"
+            ],
+            "check_title": "Schema allows arbitrary properties",
+            "check_rationale": "Tool input schemas should not allow arbitrary top-level properties."
+          },
+          "rule": {
+            "id": "schema_allows_arbitrary_properties"
+          }
+        },
+        {
+          "ruleId": "weak_input_schema",
+          "ruleIndex": 6,
+          "level": "warning",
+          "message": {
+            "text": "Tool 'debug_payload' exposes a weak input schema that leaves free-form input underconstrained."
+          },
+          "partialFingerprints": {
+            "primaryLocationLineHash": "35e7061642b5c3435381698a4f95d6541187d1675481980427fe1a40ff18ed37"
+          },
+          "properties": {
+            "risk_category": "schema_hygiene",
+            "bucket": "ergonomics",
+            "score_impact": 10,
+            "tool_name": "debug_payload",
+            "finding_category": "input-schema",
+            "evidence": [
+              "matched_heuristic=inputful_tool_with_empty_object_schema"
+            ],
+            "check_title": "Weak input schema",
+            "check_rationale": "Tool input schemas should constrain free-form payloads clearly."
+          },
+          "rule": {
+            "id": "weak_input_schema"
+          }
+        },
+        {
+          "ruleId": "dangerous_exec_tool",
+          "ruleIndex": 8,
+          "level": "error",
+          "message": {
+            "text": "Tool 'exec_command' appears to expose host command execution."
+          },
+          "partialFingerprints": {
+            "primaryLocationLineHash": "3e508e543552e78eb3365aebbd5a55ddee2333be95ecdcaa4f0bd5ffbd1239b0"
+          },
+          "properties": {
+            "risk_category": "command_execution",
+            "bucket": "security",
+            "score_impact": 20,
+            "tool_name": "exec_command",
+            "finding_category": "capability",
+            "evidence": [
+              "name_markers=['exec', 'command']",
+              "description_markers=['execute', 'shell command', 'host machine']",
+              "input_keys=['command']"
+            ],
+            "check_title": "Dangerous execution tool",
+            "check_rationale": "Tools that execute host shell commands are high risk."
+          },
+          "rule": {
+            "id": "dangerous_exec_tool"
+          }
+        },
+        {
+          "ruleId": "dangerous_fs_write_tool",
+          "ruleIndex": 10,
+          "level": "error",
+          "message": {
+            "text": "Tool 'write_file' appears to provide filesystem write access."
+          },
+          "partialFingerprints": {
+            "primaryLocationLineHash": "9df3db11ab93a4a1a6d1450fbfd429927319b267ea777cfe980bfb30cd579b4a"
+          },
+          "properties": {
+            "risk_category": "file_system",
+            "bucket": "security",
+            "score_impact": 20,
+            "tool_name": "write_file",
+            "finding_category": "capability",
+            "evidence": [
+              "write_markers=['write']",
+              "file_markers=['file', 'disk', 'path']",
+              "path_keys=['path']",
+              "content_keys=['content']"
+            ],
+            "check_title": "Dangerous filesystem write tool",
+            "check_rationale": "Tools that write files on disk are high risk."
+          },
+          "rule": {
+            "id": "dangerous_fs_write_tool"
+          }
+        },
+        {
+          "ruleId": "write_tool_without_scope_hint",
+          "ruleIndex": 14,
+          "level": "warning",
+          "message": {
+            "text": "Tool 'write_file' modifies the filesystem without any visible scope hint."
+          },
+          "partialFingerprints": {
+            "primaryLocationLineHash": "a21684d7faa44bee4b22f41e140b972582050308a72d5efdba7611c9068beda1"
+          },
+          "properties": {
+            "risk_category": "external_side_effects",
+            "bucket": "ergonomics",
+            "score_impact": 10,
+            "tool_name": "write_file",
+            "finding_category": "capability",
+            "evidence": [
+              "path_keys=['path']",
+              "scope_hint=<missing>"
+            ],
+            "check_title": "Write tool without scope hint",
+            "check_rationale": "Filesystem mutation tools should document scope constraints clearly."
+          },
+          "rule": {
+            "id": "write_tool_without_scope_hint"
+          }
+        }
+      ]
+    }
+  ]
+}

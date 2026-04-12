@@ -1,0 +1,62 @@
+# --- Rust -----------------------------------------------------------------
+/target/
+**/*.rs.bk
+Cargo.lock.bak
+*.profraw
+*.profdata
+tarpaulin-report.*
+
+# --- Release / packaging --------------------------------------------------
+/dist/
+/pkg/
+*.tar.gz
+*.zip
+
+# --- Fuzz -----------------------------------------------------------------
+/fuzz/target/
+/fuzz/corpus/
+/fuzz/artifacts/
+/fuzz/coverage/
+
+# --- Snapshot review ------------------------------------------------------
+*.snap.new
+.snapshots/
+.insta-pending/
+
+# --- Editor / IDE ---------------------------------------------------------
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*.tmp
+*~
+
+# --- OS -------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Secrets / env --------------------------------------------------------
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+
+# --- Local scratch --------------------------------------------------------
+/scratch/
+/tmp/
+/.cache/
+coverage/
+lcov.info
+DEPLOY.md
+
+# --- AI / agent scaffolding (not for publication) -------------------------
+.claude
+.codex
+.agents
+.ai-factory
+.ai-factory.json
+skills-lock.json

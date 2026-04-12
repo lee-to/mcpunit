@@ -1,0 +1,44 @@
+---
+source: tests/reporter_snapshots.rs
+expression: rendered
+---
+# mcpunit Audit — danger-mock
+
+**Total score:** `0 / 100`  
+**Findings:** 7 (error: 3, warning: 4, info: 0)  
+**Tools discovered:** 2
+
+## Category Scores
+
+| Bucket | Score | Findings | Penalty |
+| --- | --- | --- | --- |
+| conformance | 80/100 | 2 | 20 |
+| security | 40/100 | 3 | 60 |
+| ergonomics | 90/100 | 1 | 10 |
+| metadata | 90/100 | 1 | 10 |
+
+## Findings By Bucket
+
+### security (3 findings, penalty: 60)
+
+- **ERROR** `dangerous_fs_delete_tool` `[delete_file]`: Tool 'delete_file' appears to provide filesystem delete access.
+- **ERROR** `dangerous_http_request_tool` `[http_download]`: Tool 'http_download' appears to expose outbound HTTP request capability.
+- **ERROR** `dangerous_shell_download_exec` `[http_download]`: Tool 'http_download' appears to combine remote download capability with command execution.
+
+### conformance (2 findings, penalty: 20)
+
+- **WARNING** `missing_required_for_critical_fields` `[delete_file]`: Tool 'delete_file' defines critical input fields that are not required.
+- **WARNING** `missing_required_for_critical_fields` `[http_download]`: Tool 'http_download' defines critical input fields that are not required.
+
+### ergonomics (1 finding, penalty: 10)
+
+- **WARNING** `write_tool_without_scope_hint` `[delete_file]`: Tool 'delete_file' modifies the filesystem without any visible scope hint.
+
+### metadata (1 finding, penalty: 10)
+
+- **WARNING** `tool_description_mentions_destructive_access` `[delete_file]`: Tool 'delete_file' description explicitly advertises broad destructive access.
+
+## Limitations
+
+- Low score means more deterministic findings or higher-risk exposed surface, not malicious intent.
+- High score means fewer deterministic findings, not a guarantee of safety.

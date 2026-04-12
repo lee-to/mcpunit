@@ -1,0 +1,32 @@
+name: fuzz
+
+# Nightly 60-second sweeps for each cargo-fuzz target. Non-blocking: failures
+# open an issue rather than failing CI so the main pipeline stays clean.
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  fuzz:
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [jsonrpc_parser, sarif_fingerprint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: fuzz
+      - name: Install cargo-fuzz
+        run: cargo install --locked cargo-fuzz
+      - name: Run ${{ matrix.target }}
+        working-directory: fuzz
+        run: cargo +nightly fuzz run ${{ matrix.target }} -- -max_total_time=60

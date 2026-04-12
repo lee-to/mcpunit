@@ -1,0 +1,63 @@
+name: Feature request
+description: Suggest a new rule, reporter, flag, or other improvement.
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement! Please describe the problem
+        first and the proposed solution second — that way we can evaluate
+        alternative approaches.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: |
+        Describe the use case. Concrete scenarios are more persuasive
+        than abstract ideas.
+      placeholder: |
+        "When I test an MCP server that exposes `delete_user_data`, ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: |
+        What would you like mcpunit to do? If it's a new rule, what
+        should `rule_id`, evidence, and severity look like?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: |
+        Any other approaches you thought about and rejected, and why.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of change
+      options:
+        - New rule
+        - New reporter
+        - New CLI flag
+        - New transport
+        - Performance improvement
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: I am willing to open a PR for this if maintainers agree.

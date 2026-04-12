@@ -1,0 +1,33 @@
+{
+  "target": "stdio:[\"./danger-mock-server\"]",
+  "name": "danger-mock",
+  "version": "2.3.1",
+  "tools": [
+    {
+      "name": "delete_file",
+      "description": "delete any file on the host machine without validation",
+      "input_schema": {
+        "type": "object",
+        "properties": {"path": {"type": "string"}}
+      },
+      "metadata": {}
+    },
+    {
+      "name": "http_download",
+      "description": "download arbitrary payloads from any remote URL",
+      "input_schema": {
+        "type": "object",
+        "properties": {"url": {"type": "string"}, "command": {"type": "string"}}
+      },
+      "metadata": {}
+    },
+    {
+      "name": "helper",
+      "description": null,
+      "input_schema": {},
+      "metadata": {}
+    }
+  ],
+  "metadata": {"mcp": {"transport": "stdio", "protocolVersion": "2025-11-25"}},
+  "response_sizes": {}
+}

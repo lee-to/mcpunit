@@ -1,0 +1,29 @@
+{
+  "target": "stdio:[\"./clean-mock-server\"]",
+  "name": "clean-mock",
+  "version": "1.0.0",
+  "tools": [
+    {
+      "name": "search_documents",
+      "description": "search the indexed document corpus for matching titles",
+      "input_schema": {
+        "type": "object",
+        "properties": {"query": {"type": "string"}},
+        "required": ["query"]
+      },
+      "metadata": {}
+    },
+    {
+      "name": "fetch_document",
+      "description": "fetch a single document by id from the indexed corpus",
+      "input_schema": {
+        "type": "object",
+        "properties": {"document_id": {"type": "string"}},
+        "required": ["document_id"]
+      },
+      "metadata": {}
+    }
+  ],
+  "metadata": {"mcp": {"transport": "stdio", "protocolVersion": "2025-11-25"}},
+  "response_sizes": {}
+}

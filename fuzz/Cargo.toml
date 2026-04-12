@@ -1,0 +1,32 @@
+[package]
+name = "mcpunit-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+mcpunit = { path = ".." }
+serde_json = "1.0"
+sha2 = "0.10"
+
+# Disable incremental builds so the sanitizer runtimes link cleanly.
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "jsonrpc_parser"
+path = "fuzz_targets/jsonrpc_parser.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "sarif_fingerprint"
+path = "fuzz_targets/sarif_fingerprint.rs"
+test = false
+doc = false
+bench = false

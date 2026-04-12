@@ -1,0 +1,26 @@
+---
+source: tests/reporter_snapshots.rs
+expression: normalise(&rendered)
+---
+Generator: mcpunit (mcpunit 1.0.0)
+Report Schema: https://mcpunit.cutcode.dev/schema/audit/v1@1
+Scan Timestamp: [REDACTED]
+Server: clean-mock
+Version: 1.0.0
+Target: stdio:clean
+Target Description: Local MCP server launched over stdio.
+Tools: 2
+Finding Counts: total=0, error=0, warning=0, info=0
+Total Score: 100/100
+Why This Score: No deterministic issues were detected in the current server surface.
+Score Meaning: Deterministic CI-first quality audit based on conformance, security-relevant capabilities, ergonomics, and metadata hygiene.
+Category Scores:
+- conformance: 100/100 (findings: 0, penalties: 0)
+- security: 100/100 (findings: 0, penalties: 0)
+- ergonomics: 100/100 (findings: 0, penalties: 0)
+- metadata: 100/100 (findings: 0, penalties: 0)
+Findings By Bucket:
+- none
+Limitations:
+- Low score means more deterministic findings or higher-risk exposed surface, not malicious intent.
+- High score means fewer deterministic findings, not a guarantee of safety.

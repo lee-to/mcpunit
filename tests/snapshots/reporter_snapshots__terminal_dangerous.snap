@@ -1,0 +1,36 @@
+---
+source: tests/reporter_snapshots.rs
+expression: normalise(&rendered)
+---
+Generator: mcpunit (mcpunit 1.0.0)
+Report Schema: https://mcpunit.cutcode.dev/schema/audit/v1@1
+Scan Timestamp: [REDACTED]
+Server: danger-mock
+Version: 2.3.1
+Target: stdio:dangerous
+Target Description: Local MCP server launched over stdio.
+Tools: 2
+Finding Counts: total=7, error=3, warning=4, info=0
+Total Score: 0/100
+Why This Score: Score is driven mainly by security findings in command execution and file system and conformance findings.
+Score Meaning: Deterministic CI-first quality audit based on conformance, security-relevant capabilities, ergonomics, and metadata hygiene.
+Category Scores:
+- conformance: 80/100 (findings: 2, penalties: 20)
+- security: 40/100 (findings: 3, penalties: 60)
+- ergonomics: 90/100 (findings: 1, penalties: 10)
+- metadata: 90/100 (findings: 1, penalties: 10)
+Findings By Bucket:
+- security: 3 findings, penalties: 60
+  - ERROR dangerous_fs_delete_tool [delete_file]: Tool 'delete_file' appears to provide filesystem delete access.
+  - ERROR dangerous_http_request_tool [http_download]: Tool 'http_download' appears to expose outbound HTTP request capability.
+  - ERROR dangerous_shell_download_exec [http_download]: Tool 'http_download' appears to combine remote download capability with command execution.
+- conformance: 2 findings, penalties: 20
+  - WARNING missing_required_for_critical_fields [delete_file]: Tool 'delete_file' defines critical input fields that are not required.
+  - WARNING missing_required_for_critical_fields [http_download]: Tool 'http_download' defines critical input fields that are not required.
+- ergonomics: 1 finding, penalties: 10
+  - WARNING write_tool_without_scope_hint [delete_file]: Tool 'delete_file' modifies the filesystem without any visible scope hint.
+- metadata: 1 finding, penalties: 10
+  - WARNING tool_description_mentions_destructive_access [delete_file]: Tool 'delete_file' description explicitly advertises broad destructive access.
+Limitations:
+- Low score means more deterministic findings or higher-risk exposed surface, not malicious intent.
+- High score means fewer deterministic findings, not a guarantee of safety.

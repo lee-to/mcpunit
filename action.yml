@@ -1,0 +1,222 @@
+name: mcpunit
+author: Danil Shutsky <thecutcode@gmail.com>
+description: >-
+  Deterministic CI-first quality audit for MCP servers. Downloads a
+  prebuilt mcpunit binary from GitHub Releases, runs a test against a
+  local stdio or Streamable HTTP server, and emits JSON, SARIF, and
+  Markdown reports plus GitHub Action outputs.
+
+branding:
+  icon: shield
+  color: green
+
+inputs:
+  version:
+    description: >-
+      Release tag of mcpunit to install (e.g. `v1.0.0`). Defaults to the
+      version this action.yml was shipped with. Pinning a specific tag
+      keeps CI hermetic.
+    required: false
+    default: v1.0.0
+  cmd:
+    description: >-
+      Subprocess command used to start the MCP server over stdio. Ignored
+      when `url` is set. Required in stdio mode.
+    required: false
+    default: ""
+  url:
+    description: >-
+      Streamable HTTP URL to test (MCP 2025-03-26+). Ignored when `cmd` is
+      set. Required in http mode.
+    required: false
+    default: ""
+  transport:
+    description: >-
+      Transport flavour: `stdio` or `http`. If unset, inferred from `cmd` or
+      `url`.
+    required: false
+    default: ""
+  headers:
+    description: >-
+      Newline-separated list of extra HTTP headers to send, `Name: Value`
+      format. Only meaningful for the `http` transport.
+    required: false
+    default: ""
+  timeout:
+    description: Per-request timeout in seconds.
+    required: false
+    default: "10"
+  max-response-bytes:
+    description: Hard cap on a single JSON-RPC response / SSE event (bytes).
+    required: false
+    default: "1048576"
+  min-score:
+    description: Minimum total score required to pass. Range 0..=100.
+    required: false
+    default: "0"
+  json-out:
+    description: Path for the JSON audit report file.
+    required: false
+    default: mcpunit.json
+  sarif-out:
+    description: Path for the SARIF report file.
+    required: false
+    default: mcpunit.sarif
+  markdown-out:
+    description: Optional path for a Markdown audit summary file.
+    required: false
+    default: ""
+  upload-sarif:
+    description: >-
+      When `true`, run the companion `github/codeql-action/upload-sarif`
+      step against `sarif-out`. Requires `security-events: write`.
+    required: false
+    default: "false"
+
+outputs:
+  total-score:
+    description: Total score from the mcpunit report.
+    value: ${{ steps.audit.outputs.total-score }}
+  category-scores:
+    description: Compact JSON object with category scores keyed by bucket.
+    value: ${{ steps.audit.outputs.category-scores }}
+  passed:
+    description: Whether the audit test passed and the min-score gate.
+    value: ${{ steps.audit.outputs.passed }}
+
+runs:
+  using: composite
+  steps:
+    - name: Detect platform
+      id: detect
+      shell: bash
+      run: |
+        set -euo pipefail
+        os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+        arch="$(uname -m)"
+        case "${os}-${arch}" in
+          linux-x86_64)   target="x86_64-unknown-linux-gnu"; archive="tar.gz"; bin="mcpunit" ;;
+          linux-aarch64)  target="aarch64-unknown-linux-gnu"; archive="tar.gz"; bin="mcpunit" ;;
+          linux-arm64)    target="aarch64-unknown-linux-gnu"; archive="tar.gz"; bin="mcpunit" ;;
+          darwin-x86_64)  target="x86_64-apple-darwin"; archive="tar.gz"; bin="mcpunit" ;;
+          darwin-arm64)   target="aarch64-apple-darwin"; archive="tar.gz"; bin="mcpunit" ;;
+          mingw*|msys*|cygwin*|windows*)
+            target="x86_64-pc-windows-msvc"; archive="zip"; bin="mcpunit.exe" ;;
+          *)
+            echo "::error::Unsupported OS/arch: ${os}-${arch}"
+            exit 1
+            ;;
+        esac
+        echo "target=${target}" >> "$GITHUB_OUTPUT"
+        echo "archive=${archive}" >> "$GITHUB_OUTPUT"
+        echo "bin=${bin}" >> "$GITHUB_OUTPUT"
+
+    - name: Cache mcpunit binary
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.tool_cache }}/mcpunit/${{ inputs.version }}/${{ steps.detect.outputs.target }}
+        key: mcpunit-${{ inputs.version }}-${{ steps.detect.outputs.target }}
+
+    - name: Download mcpunit binary
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        base="${GITHUB_ACTION_REPOSITORY:-anthropic-contrib/mcpunit}"
+        version="${{ inputs.version }}"
+        target="${{ steps.detect.outputs.target }}"
+        archive="${{ steps.detect.outputs.archive }}"
+        url="https://github.com/${base}/releases/download/${version}/mcpunit-${target}.${archive}"
+        dest="${{ runner.tool_cache }}/mcpunit/${version}/${target}"
+        mkdir -p "$dest"
+        echo "Downloading $url"
+        if [ "$archive" = "tar.gz" ]; then
+          curl -fsSL "$url" | tar -xz -C "$dest"
+        else
+          tmp="$(mktemp)"
+          curl -fsSL -o "$tmp" "$url"
+          unzip -o "$tmp" -d "$dest"
+          rm -f "$tmp"
+        fi
+        chmod +x "$dest/${{ steps.detect.outputs.bin }}" || true
+
+    - name: Add mcpunit to PATH
+      shell: bash
+      run: |
+        echo "${{ runner.tool_cache }}/mcpunit/${{ inputs.version }}/${{ steps.detect.outputs.target }}" >> "$GITHUB_PATH"
+
+    - name: Run test
+      id: audit
+      continue-on-error: true
+      shell: bash
+      env:
+        MCPUNIT_CMD: ${{ inputs.cmd }}
+        MCPUNIT_URL: ${{ inputs.url }}
+        MCPUNIT_TRANSPORT: ${{ inputs.transport }}
+        MCPUNIT_HEADERS: ${{ inputs.headers }}
+      run: |
+        set -euo pipefail
+        args=(
+          "--log" "info"
+          "test"
+          "--timeout" "${{ inputs.timeout }}"
+          "--max-response-bytes" "${{ inputs.max-response-bytes }}"
+          "--min-score" "${{ inputs.min-score }}"
+          "--json-out" "${{ inputs.json-out }}"
+          "--sarif-out" "${{ inputs.sarif-out }}"
+        )
+        if [ -n "${{ inputs.markdown-out }}" ]; then
+          args+=("--markdown-out" "${{ inputs.markdown-out }}")
+        fi
+        if [ -n "${MCPUNIT_TRANSPORT}" ]; then
+          args+=("--transport" "${MCPUNIT_TRANSPORT}")
+        fi
+
+        if [ -n "${MCPUNIT_URL}" ]; then
+          args+=("--url" "${MCPUNIT_URL}")
+          while IFS= read -r header; do
+            [ -z "$header" ] && continue
+            args+=("--header" "$header")
+          done <<< "${MCPUNIT_HEADERS}"
+        elif [ -n "${MCPUNIT_CMD}" ]; then
+          # shellcheck disable=SC2206
+          cmd_parts=(${MCPUNIT_CMD})
+          args+=("--cmd")
+          args+=("${cmd_parts[@]}")
+        else
+          echo "::error::Either 'cmd' or 'url' must be provided"
+          exit 1
+        fi
+
+        mcpunit "${args[@]}"
+        status=$?
+        echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+
+        # Extract outputs from the JSON report using jq (pre-installed on
+        # every GitHub-hosted runner).
+        if [ -f "${{ inputs.json-out }}" ] && command -v jq >/dev/null 2>&1; then
+          total_score=$(jq -r '.audit.total_score.value' "${{ inputs.json-out }}")
+          category_scores=$(jq -cr '.audit.category_scores | to_entries | map({(.key): .value.score}) | add' "${{ inputs.json-out }}")
+          echo "total-score=${total_score}" >> "$GITHUB_OUTPUT"
+          echo "category-scores=${category_scores}" >> "$GITHUB_OUTPUT"
+        fi
+        if [ "$status" = "0" ]; then
+          echo "passed=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "passed=false" >> "$GITHUB_OUTPUT"
+        fi
+        exit $status
+
+    - name: Upload SARIF to GitHub code scanning
+      if: ${{ inputs.upload-sarif == 'true' && hashFiles(inputs.sarif-out) != '' }}
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ inputs.sarif-out }}
+
+    - name: Surface test failure
+      if: steps.audit.outcome == 'failure'
+      shell: bash
+      run: |
+        echo "::error::mcpunit test exited with code ${{ steps.audit.outputs.exit_code }}"
+        exit 1
