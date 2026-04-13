@@ -106,6 +106,8 @@ fn normalise(text: &str) -> String {
         .map(|line| {
             if line.starts_with("Scan Timestamp: ") {
                 "Scan Timestamp: [REDACTED]".to_string()
+            } else if line.starts_with("Generator: mcpunit (mcpunit ") {
+                "Generator: mcpunit (mcpunit [REDACTED])".to_string()
             } else {
                 line.to_string()
             }

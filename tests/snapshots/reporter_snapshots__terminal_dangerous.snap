@@ -2,7 +2,7 @@
 source: tests/reporter_snapshots.rs
 expression: normalise(&rendered)
 ---
-Generator: mcpunit (mcpunit 1.0.0)
+Generator: mcpunit (mcpunit [REDACTED])
 Report Schema: https://mcpunit.cutcode.dev/schema/audit/v1@1
 Scan Timestamp: [REDACTED]
 Server: danger-mock
