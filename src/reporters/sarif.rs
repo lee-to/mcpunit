@@ -51,6 +51,7 @@ pub fn report_to_sarif(report: &Report) -> Value {
             finding,
             &report.rule_descriptors,
             artifact_uri.as_deref(),
+            &report.server.target,
         ));
     }
 
@@ -146,6 +147,7 @@ fn serialize_result(
     finding: &Finding,
     descriptors: &[RuleDescriptor],
     artifact_uri: Option<&str>,
+    server_target: &str,
 ) -> Value {
     let rule_index = descriptors
         .iter()
@@ -184,20 +186,35 @@ fn serialize_result(
     }
     result.insert("properties".to_string(), Value::Object(properties));
 
-    if let Some(uri) = artifact_uri {
-        let mut location = Map::new();
-        let mut physical = Map::new();
-        physical.insert("artifactLocation".to_string(), json!({"uri": uri}));
-        physical.insert("region".to_string(), json!({"startLine": 1}));
-        location.insert("physicalLocation".to_string(), Value::Object(physical));
-        if let Some(first) = finding.evidence.first() {
-            location.insert("message".to_string(), json!({"text": first}));
-        }
-        result.insert(
-            "locations".to_string(),
-            Value::Array(vec![Value::Object(location)]),
+    let (location_uri, is_synthetic) = match artifact_uri {
+        Some(uri) => (uri.to_string(), false),
+        None => (synthetic_location_uri(finding, server_target), true),
+    };
+    let mut location = Map::new();
+    let mut physical = Map::new();
+    physical.insert("artifactLocation".to_string(), json!({"uri": location_uri}));
+    physical.insert("region".to_string(), json!({"startLine": 1}));
+    location.insert("physicalLocation".to_string(), Value::Object(physical));
+    if is_synthetic {
+        let name = finding
+            .tool_name
+            .clone()
+            .unwrap_or_else(|| server_target.to_string());
+        location.insert(
+            "logicalLocations".to_string(),
+            Value::Array(vec![json!({
+                "name": name,
+                "kind": if finding.tool_name.is_some() { "function" } else { "module" },
+            })]),
         );
     }
+    if let Some(first) = finding.evidence.first() {
+        location.insert("message".to_string(), json!({"text": first}));
+    }
+    result.insert(
+        "locations".to_string(),
+        Value::Array(vec![Value::Object(location)]),
+    );
 
     if let Some(desc) = descriptor {
         result.insert("rule".to_string(), json!({"id": desc.rule_id}));
@@ -246,6 +263,15 @@ fn compute_fingerprint(finding: &Finding, artifact_uri: Option<&str>) -> String 
     let mut hasher = Sha256::new();
     hasher.update(source.as_bytes());
     format!("{:x}", hasher.finalize())
+}
+
+fn synthetic_location_uri(finding: &Finding, server_target: &str) -> String {
+    if let Some(tool) = finding.tool_name.as_deref() {
+        let encoded = tool.replace(' ', "%20");
+        return format!("mcp-tool://{encoded}");
+    }
+    let encoded = server_target.replace(' ', "%20");
+    format!("mcp-server://{encoded}")
 }
 
 fn infer_artifact_uri(server: &NormalizedServer) -> Option<String> {
@@ -327,6 +353,54 @@ mod tests {
             .as_array()
             .unwrap();
         assert_eq!(rules.len(), 17);
+    }
+
+    #[test]
+    fn every_result_has_at_least_one_location() {
+        let report = sample_report();
+        let out = SarifReporter.render(&report);
+        let parsed: Value = serde_json::from_str(out.trim_end()).unwrap();
+        let results = parsed["runs"][0]["results"].as_array().unwrap();
+        assert!(!results.is_empty(), "sample report should produce findings");
+        for result in results {
+            let locations = result["locations"].as_array().unwrap_or_else(|| {
+                panic!("result missing locations[]: {result}");
+            });
+            assert!(
+                !locations.is_empty(),
+                "result has empty locations[]: {result}"
+            );
+            let uri = locations[0]["physicalLocation"]["artifactLocation"]["uri"].as_str();
+            assert!(uri.is_some() && !uri.unwrap().is_empty());
+        }
+    }
+
+    #[test]
+    fn synthetic_uri_uses_tool_name_then_server_target() {
+        let finding_with_tool = Finding {
+            rule_id: "r".into(),
+            level: Severity::Warning,
+            title: None,
+            message: "m".into(),
+            category: FindingCategory::ToolIdentity,
+            risk_category: RiskCategory::MetadataHygiene,
+            bucket: ScoreBucket::Metadata,
+            evidence: vec![],
+            penalty: 1,
+            tool_name: Some("helper".into()),
+            metadata: Default::default(),
+        };
+        assert_eq!(
+            synthetic_location_uri(&finding_with_tool, "stdio:test"),
+            "mcp-tool://helper"
+        );
+
+        let mut finding_no_tool = finding_with_tool.clone();
+        finding_no_tool.tool_name = None;
+        assert_eq!(
+            synthetic_location_uri(&finding_no_tool, "stdio:test"),
+            "mcp-server://stdio:test"
+        );
     }
 
     #[test]
