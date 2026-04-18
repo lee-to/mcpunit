@@ -9,6 +9,12 @@
 //! * `debug_payload` → `weak_input_schema` + `schema_allows_arbitrary_properties`
 //! * `do_it`         → `overly_generic_tool_name` + `vague_tool_description`
 //!
+//! Two intentionally-sloppy prompts drive the prompt-surface rules so the
+//! same demo run also shows the `prompt_*` family in action:
+//!
+//! * `summarize` (no description)       → `prompt_missing_description`
+//! * `translate` (one arg undocumented) → `prompt_argument_missing_description`
+//!
 //! Speaks newline-delimited JSON-RPC 2.0 over stdio, compatible with the
 //! mcpunit stdio transport. The "dangerous" bits live purely in tool
 //! *metadata* (names, descriptions, schemas) — this binary never touches
@@ -51,7 +57,7 @@ fn main() -> io::Result<()> {
                         "id": request_id,
                         "result": {
                             "protocolVersion": "2025-11-25",
-                            "capabilities": {"tools": {}},
+                            "capabilities": {"tools": {}, "prompts": {}},
                             "serverInfo": {
                                 "name": "mcpunit demo server",
                                 "version": "0.1.0"
@@ -80,6 +86,25 @@ fn main() -> io::Result<()> {
                         "jsonrpc": "2.0",
                         "id": request_id,
                         "result": {"tools": tools()}
+                    }),
+                )?;
+            }
+            Some("prompts/list") => {
+                if !initialized {
+                    send_error(
+                        &mut stdout,
+                        request_id,
+                        -32000,
+                        "Client did not send initialized.",
+                    )?;
+                    continue;
+                }
+                send(
+                    &mut stdout,
+                    &json!({
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                        "result": {"prompts": prompts()}
                     }),
                 )?;
             }
@@ -196,6 +221,39 @@ fn tools() -> Value {
                 "description": "Arbitrary debug payload.",
                 "additionalProperties": true
             }
+        }
+    ])
+}
+
+fn prompts() -> Value {
+    json!([
+        {
+            // Missing description: trips `prompt_missing_description`.
+            "name": "summarize",
+            "arguments": [
+                {
+                    "name": "text",
+                    "description": "Source text to summarise.",
+                    "required": true
+                }
+            ]
+        },
+        {
+            // `lang` argument has no description: trips
+            // `prompt_argument_missing_description`.
+            "name": "translate",
+            "description": "Translate the given text into the target language.",
+            "arguments": [
+                {
+                    "name": "text",
+                    "description": "Source text to translate.",
+                    "required": true
+                },
+                {
+                    "name": "lang",
+                    "required": true
+                }
+            ]
         }
     ])
 }

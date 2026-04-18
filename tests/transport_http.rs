@@ -98,17 +98,17 @@ fn scan_round_trips_sse_responses() {
 }
 
 #[test]
-fn prompts_only_server_scans_without_protocol_error() {
-    // Regression: MCP spec allows servers to advertise only `prompts`
-    // or `resources` without tools. The scan must succeed, skip
-    // `tools/list` entirely, and surface the missing capability via
-    // server metadata.
+fn prompts_only_server_scans_and_discovers_prompts() {
+    // Regression + feature: MCP spec allows servers to advertise only
+    // `prompts`. The scan must skip `tools/list`, issue `prompts/list`,
+    // and surface the discovered prompts on `server.prompts`.
     const PROMPTS_ONLY_INIT: &str = r#"{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2025-11-25","capabilities":{"prompts":{}},"serverInfo":{"name":"prompts-only","version":"0.1.0"}}}"#;
-    // Only two responses are queued — `initialize` and the
-    // `notifications/initialized` ack. If the transport erroneously
-    // issues `tools/list`, the mock will fail to accept the connection
-    // and the scan will surface a transport error.
-    let port = spawn_mock(vec![ok_json(PROMPTS_ONLY_INIT), ok_json("")]);
+    const PROMPTS_LIST: &str = r#"{"jsonrpc":"2.0","id":2,"result":{"prompts":[{"name":"summarize","description":"Summarise the given text","arguments":[{"name":"text","description":"source text","required":true}]}]}}"#;
+    let port = spawn_mock(vec![
+        ok_json(PROMPTS_ONLY_INIT),
+        ok_json(""),
+        ok_json(PROMPTS_LIST),
+    ]);
     let mut transport = HttpTransport::new(
         HttpConfig::new(format!("http://127.0.0.1:{port}/mcp"))
             .with_timeout(Duration::from_secs(5)),
@@ -123,8 +123,15 @@ fn prompts_only_server_scans_without_protocol_error() {
     assert_eq!(
         server.metadata.get("has_tools_capability"),
         Some(&serde_json::Value::Bool(false)),
-        "metadata must surface that tools capability is absent"
     );
+    assert_eq!(
+        server.metadata.get("has_prompts_capability"),
+        Some(&serde_json::Value::Bool(true)),
+    );
+    assert_eq!(server.prompts.len(), 1);
+    assert_eq!(server.prompts[0].name, "summarize");
+    assert_eq!(server.prompts[0].arguments.len(), 1);
+    assert_eq!(server.prompts[0].arguments[0].required, Some(true));
 }
 
 #[test]

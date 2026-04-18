@@ -1,4 +1,4 @@
-.PHONY: build release test clippy lint fmt check install uninstall clean reports snapshots help
+.PHONY: build release demo test clippy lint fmt check install uninstall clean reports snapshots help
 
 # Default target
 all: install
@@ -10,6 +10,10 @@ build:
 # Release build (optimized)
 release:
 	cargo build --release --bin mcpunit
+
+# Release build of the bundled demo MCP server (consumed by `reports`)
+demo:
+	cargo build --release --example demo
 
 # Run all tests
 test:
@@ -28,11 +32,11 @@ fmt:
 	cargo fmt
 
 # Run mcpunit against the bundled demo MCP server
-check: release
+check: release demo
 	./target/release/mcpunit test --cmd ./target/release/examples/demo
 
 # Regenerate .reports/demo.* from the demo server
-reports: release
+reports: release demo
 	@mkdir -p .reports
 	./target/release/mcpunit --log warn test \
 		--min-score 0 \

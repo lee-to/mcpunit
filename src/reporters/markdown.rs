@@ -72,16 +72,17 @@ impl Reporter for MarkdownReporter {
                     group.penalty_points
                 ));
                 for finding in &group.findings {
-                    let tool = finding
-                        .tool_name
-                        .as_deref()
-                        .map(|t| format!(" `[{t}]`"))
-                        .unwrap_or_default();
+                    let subject =
+                        match (finding.tool_name.as_deref(), finding.prompt_name.as_deref()) {
+                            (Some(t), _) => format!(" `[tool:{t}]`"),
+                            (None, Some(p)) => format!(" `[prompt:{p}]`"),
+                            (None, None) => String::new(),
+                        };
                     out.push_str(&format!(
                         "- **{}** `{}`{}: {}\n",
                         finding.severity.as_str().to_ascii_uppercase(),
                         finding.id,
-                        tool,
+                        subject,
                         finding.message
                     ));
                 }

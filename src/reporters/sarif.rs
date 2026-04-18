@@ -352,7 +352,7 @@ mod tests {
         let rules = parsed["runs"][0]["tool"]["driver"]["rules"]
             .as_array()
             .unwrap();
-        assert_eq!(rules.len(), 17);
+        assert_eq!(rules.len(), 24);
     }
 
     #[test]
@@ -388,6 +388,7 @@ mod tests {
             evidence: vec![],
             penalty: 1,
             tool_name: Some("helper".into()),
+            prompt_name: None,
             metadata: Default::default(),
         };
         assert_eq!(
@@ -416,6 +417,7 @@ mod tests {
             evidence: vec!["e".to_string()],
             penalty: 10,
             tool_name: Some("t".to_string()),
+            prompt_name: None,
             metadata: Default::default(),
         };
         let fp = compute_fingerprint(&finding, None);

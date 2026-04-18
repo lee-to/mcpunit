@@ -228,6 +228,7 @@ mod tests {
             evidence: vec!["e".to_string()],
             penalty,
             tool_name: Some("tool".to_string()),
+            prompt_name: None,
             metadata: BTreeMap::new(),
         }
     }

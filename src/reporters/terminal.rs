@@ -93,11 +93,14 @@ impl Reporter for TerminalReporter {
 }
 
 fn format_finding_line(finding: &SummaryFinding) -> String {
-    let suffix = finding
-        .tool_name
-        .as_deref()
-        .map(|t| format!(" [{t}]"))
-        .unwrap_or_default();
+    // Rules target either a tool (`tool_name`) or a prompt (`prompt_name`).
+    // Tag the subject with `tool:` / `prompt:` so a reader of a mixed
+    // report can tell at a glance which surface the finding concerns.
+    let suffix = match (finding.tool_name.as_deref(), finding.prompt_name.as_deref()) {
+        (Some(t), _) => format!(" [tool:{t}]"),
+        (None, Some(p)) => format!(" [prompt:{p}]"),
+        (None, None) => String::new(),
+    };
     format!(
         "- {} {}{}: {}",
         finding.severity.as_str().to_ascii_uppercase(),

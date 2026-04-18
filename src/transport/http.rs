@@ -30,7 +30,7 @@ use serde_json::Value;
 use tracing::{debug, info, trace, warn};
 
 use crate::error::{Result, StderrTail, TransportError};
-use crate::models::{MetadataMap, NormalizedTool};
+use crate::models::{MetadataMap, NormalizedPrompt, NormalizedPromptArgument, NormalizedTool};
 use crate::transport::jsonrpc::{JsonRpcId, JsonRpcMessage, JsonRpcVersion};
 use crate::transport::{
     validate_protocol_version, ClientInfo, InitializeResult, RequestIdGenerator, Transport,
@@ -510,6 +510,10 @@ impl Transport for HttpTransport {
             .get("tools")
             .map(Value::is_object)
             .unwrap_or(false);
+        let has_prompts_capability = capabilities
+            .get("prompts")
+            .map(Value::is_object)
+            .unwrap_or(false);
 
         let server_info = obj
             .get("serverInfo")
@@ -550,6 +554,7 @@ impl Transport for HttpTransport {
             server = %server_name,
             protocol_version = %protocol_version,
             has_tools_capability,
+            has_prompts_capability,
             "http initialize complete"
         );
 
@@ -559,6 +564,7 @@ impl Transport for HttpTransport {
             server_version,
             instructions,
             has_tools_capability,
+            has_prompts_capability,
             raw,
         })
     }
@@ -607,6 +613,54 @@ impl Transport for HttpTransport {
                 Some(_) => {
                     return Err(Self::protocol_error(
                         "tools/list result.nextCursor must be a non-empty string when present",
+                    ));
+                }
+            }
+        }
+    }
+
+    fn list_prompts(&mut self) -> Result<Vec<NormalizedPrompt>> {
+        let mut prompts: Vec<NormalizedPrompt> = Vec::new();
+        let mut seen_cursors: BTreeSet<String> = BTreeSet::new();
+        let mut cursor: Option<String> = None;
+
+        loop {
+            let params = cursor.as_ref().map(|c| serde_json::json!({ "cursor": c }));
+            let result = self.send_request("prompts/list", params)?;
+            let obj = result
+                .as_object()
+                .ok_or_else(|| Self::protocol_error("prompts/list result must be an object"))?;
+            let raw_prompts = obj
+                .get("prompts")
+                .and_then(Value::as_array)
+                .ok_or_else(|| {
+                    Self::protocol_error("prompts/list result.prompts must be a list")
+                })?;
+            for payload in raw_prompts {
+                let prompt = normalize_prompt_payload(payload).map_err(Self::protocol_error)?;
+                prompts.push(prompt);
+            }
+            match obj.get("nextCursor") {
+                None | Some(Value::Null) => {
+                    debug!(count = prompts.len(), "http prompts/list complete");
+                    return Ok(prompts);
+                }
+                Some(Value::String(next)) => {
+                    if next.trim().is_empty() {
+                        return Err(Self::protocol_error(
+                            "prompts/list result.nextCursor must be a non-empty string when present",
+                        ));
+                    }
+                    if !seen_cursors.insert(next.clone()) {
+                        return Err(Self::protocol_error(format!(
+                            "prompts/list returned repeated cursor {next:?}"
+                        )));
+                    }
+                    cursor = Some(next.clone());
+                }
+                Some(_) => {
+                    return Err(Self::protocol_error(
+                        "prompts/list result.nextCursor must be a non-empty string when present",
                     ));
                 }
             }
@@ -724,6 +778,104 @@ fn normalize_tool_payload(value: &Value) -> std::result::Result<NormalizedTool, 
         description,
         input_schema,
         metadata,
+    })
+}
+
+fn normalize_prompt_payload(value: &Value) -> std::result::Result<NormalizedPrompt, String> {
+    let obj = value
+        .as_object()
+        .ok_or_else(|| "prompts/list result.prompts entries must be objects".to_string())?;
+
+    let name = obj
+        .get("name")
+        .and_then(Value::as_str)
+        .ok_or_else(|| "prompt.name must be a string".to_string())?
+        .to_string();
+
+    let description = match obj.get("description") {
+        Some(Value::String(s)) => Some(s.clone()),
+        Some(Value::Null) | None => None,
+        Some(_) => {
+            return Err(format!(
+                "prompt {name:?} description must be a string when present"
+            ));
+        }
+    };
+
+    let arguments = match obj.get("arguments") {
+        Some(Value::Array(items)) => items
+            .iter()
+            .map(|a| normalize_prompt_argument(a, &name))
+            .collect::<std::result::Result<Vec<_>, _>>()?,
+        Some(Value::Null) | None => Vec::new(),
+        Some(_) => {
+            return Err(format!(
+                "prompt {name:?} arguments must be a list when present"
+            ));
+        }
+    };
+
+    let mut metadata: MetadataMap = BTreeMap::new();
+    if let Some(title) = obj.get("title") {
+        match title {
+            Value::String(_) => {
+                metadata.insert("title".to_string(), title.clone());
+            }
+            Value::Null => {}
+            _ => {
+                return Err(format!(
+                    "prompt {name:?} title must be a string when present"
+                ));
+            }
+        }
+    }
+
+    Ok(NormalizedPrompt {
+        name,
+        description,
+        arguments,
+        metadata,
+    })
+}
+
+fn normalize_prompt_argument(
+    value: &Value,
+    prompt_name: &str,
+) -> std::result::Result<NormalizedPromptArgument, String> {
+    let obj = value
+        .as_object()
+        .ok_or_else(|| format!("prompt {prompt_name:?} argument entries must be objects"))?;
+
+    let name = obj
+        .get("name")
+        .and_then(Value::as_str)
+        .ok_or_else(|| format!("prompt {prompt_name:?} argument.name must be a string"))?
+        .to_string();
+
+    let description = match obj.get("description") {
+        Some(Value::String(s)) => Some(s.clone()),
+        Some(Value::Null) | None => None,
+        Some(_) => {
+            return Err(format!(
+                "prompt {prompt_name:?} argument {name:?} description must be a string when present"
+            ));
+        }
+    };
+
+    let required = match obj.get("required") {
+        Some(Value::Bool(b)) => Some(*b),
+        Some(Value::Null) | None => None,
+        Some(_) => {
+            return Err(format!(
+                "prompt {prompt_name:?} argument {name:?} required must be a bool when present"
+            ));
+        }
+    };
+
+    Ok(NormalizedPromptArgument {
+        name,
+        description,
+        required,
     })
 }
 

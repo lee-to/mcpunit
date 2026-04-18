@@ -21,16 +21,16 @@ Category Scores:
 - metadata: 90/100 (findings: 1, penalties: 10)
 Findings By Bucket:
 - conformance: 2 findings, penalties: 30
-  - ERROR duplicate_tool_names [helper]: Tool name 'helper' appears 2 times in the server tool list.
-  - WARNING missing_required_for_critical_fields [shell_exec]: Tool 'shell_exec' defines critical input fields that are not required.
+  - ERROR duplicate_tool_names [tool:helper]: Tool name 'helper' appears 2 times in the server tool list.
+  - WARNING missing_required_for_critical_fields [tool:shell_exec]: Tool 'shell_exec' defines critical input fields that are not required.
 - ergonomics: 3 findings, penalties: 30
-  - WARNING overly_generic_tool_name [helper]: Tool 'helper' uses an overly generic name that hides its behavior.
-  - WARNING overly_generic_tool_name [helper]: Tool 'helper' uses an overly generic name that hides its behavior.
-  - WARNING vague_tool_description [helper]: Tool 'helper' uses a vague description that does not explain its behavior clearly.
+  - WARNING overly_generic_tool_name [tool:helper]: Tool 'helper' uses an overly generic name that hides its behavior.
+  - WARNING overly_generic_tool_name [tool:helper]: Tool 'helper' uses an overly generic name that hides its behavior.
+  - WARNING vague_tool_description [tool:helper]: Tool 'helper' uses a vague description that does not explain its behavior clearly.
 - security: 1 finding, penalties: 20
-  - ERROR dangerous_exec_tool [shell_exec]: Tool 'shell_exec' appears to expose host command execution.
+  - ERROR dangerous_exec_tool [tool:shell_exec]: Tool 'shell_exec' appears to expose host command execution.
 - metadata: 1 finding, penalties: 10
-  - WARNING missing_tool_description [helper]: Tool 'helper' does not provide a description.
+  - WARNING missing_tool_description [tool:helper]: Tool 'helper' does not provide a description.
 Limitations:
 - Low score means more deterministic findings or higher-risk exposed surface, not malicious intent.
 - High score means fewer deterministic findings, not a guarantee of safety.

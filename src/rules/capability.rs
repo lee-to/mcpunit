@@ -866,6 +866,7 @@ impl Rule for ResponseTooLarge {
                 evidence,
                 penalty: severity.score_impact(),
                 tool_name: None,
+                prompt_name: None,
                 metadata: BTreeMap::new(),
             });
         }

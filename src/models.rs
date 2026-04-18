@@ -77,6 +77,13 @@ pub enum FindingCategory {
     InputSchema,
     #[serde(rename = "capability")]
     Capability,
+    // New variants MUST be appended — declaration order is the on-wire
+    // iteration order for `category_scores`, so inserting in the middle
+    // would break every downstream dashboard.
+    #[serde(rename = "prompt-identity")]
+    PromptIdentity,
+    #[serde(rename = "prompt-description")]
+    PromptDescription,
 }
 
 impl FindingCategory {
@@ -86,6 +93,8 @@ impl FindingCategory {
             FindingCategory::ToolDescription => "tool-description",
             FindingCategory::InputSchema => "input-schema",
             FindingCategory::Capability => "capability",
+            FindingCategory::PromptIdentity => "prompt-identity",
+            FindingCategory::PromptDescription => "prompt-description",
         }
     }
 }
@@ -205,6 +214,12 @@ pub struct NormalizedServer {
 
     pub tools: Vec<NormalizedTool>,
 
+    /// Prompts discovered via `prompts/list`. Empty when the server did
+    /// not advertise `capabilities.prompts`, was normalised from a
+    /// tools-only fixture, or the transport could not enumerate prompts.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub prompts: Vec<NormalizedPrompt>,
+
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub metadata: MetadataMap,
 
@@ -221,6 +236,7 @@ impl NormalizedServer {
             name: None,
             version: None,
             tools: Vec::new(),
+            prompts: Vec::new(),
             metadata: BTreeMap::new(),
             response_sizes: BTreeMap::new(),
         }
@@ -246,6 +262,34 @@ fn default_input_schema() -> serde_json::Value {
     serde_json::Value::Object(serde_json::Map::new())
 }
 
+/// A single prompt as advertised by the MCP server's `prompts/list`
+/// response.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NormalizedPrompt {
+    pub name: String,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub arguments: Vec<NormalizedPromptArgument>,
+
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub metadata: MetadataMap,
+}
+
+/// A single argument of a prompt, as declared in its `arguments` list.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NormalizedPromptArgument {
+    pub name: String,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub required: Option<bool>,
+}
+
 /// A single rule violation attached to a server scan.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Finding {
@@ -267,6 +311,12 @@ pub struct Finding {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tool_name: Option<String>,
+
+    /// Name of the prompt this finding is about, when the rule targets a
+    /// prompt rather than a tool. Mutually exclusive with `tool_name` in
+    /// practice — rules set exactly one of the two.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prompt_name: Option<String>,
 
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub metadata: MetadataMap,

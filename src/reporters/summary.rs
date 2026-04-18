@@ -36,6 +36,9 @@ pub struct SummaryFinding {
     pub bucket: ScoreBucket,
     pub risk_category: RiskCategory,
     pub tool_name: Option<String>,
+    /// Set when the finding targets a prompt rather than a tool. Mutually
+    /// exclusive with `tool_name` in practice — rules set exactly one.
+    pub prompt_name: Option<String>,
     pub rationale: Option<String>,
     pub message: String,
     pub score_impact: u32,
@@ -99,13 +102,27 @@ fn bucket_display_priority(bucket: ScoreBucket) -> u32 {
 }
 
 fn finding_sort_key(finding: &Finding) -> (i32, i32, String, String, String) {
+    // Sort key reaches for whichever subject the rule filled in — some
+    // rules target tools, some target prompts. Using the unified
+    // `subject_name` keeps ordering stable across both families.
     (
         -(finding.penalty as i32),
         -severity_rank(finding.level),
-        finding.tool_name.clone().unwrap_or_default(),
+        subject_name(finding).unwrap_or_default(),
         finding.rule_id.clone(),
         finding.message.clone(),
     )
+}
+
+/// Return whichever of `tool_name` / `prompt_name` the rule populated, if
+/// any. Prefers `tool_name` when both happen to be set — historically
+/// only one is populated, but the tool-surface is the more established
+/// audit target.
+fn subject_name(finding: &Finding) -> Option<String> {
+    finding
+        .tool_name
+        .clone()
+        .or_else(|| finding.prompt_name.clone())
 }
 
 fn to_summary_finding(finding: &Finding, rationale: Option<&str>) -> SummaryFinding {
@@ -116,6 +133,7 @@ fn to_summary_finding(finding: &Finding, rationale: Option<&str>) -> SummaryFind
         bucket: finding.bucket,
         risk_category: finding.risk_category,
         tool_name: finding.tool_name.clone(),
+        prompt_name: finding.prompt_name.clone(),
         rationale: rationale.map(|s| s.to_string()),
         message: finding.message.clone(),
         score_impact: finding.penalty,
@@ -327,6 +345,7 @@ mod tests {
             evidence: vec![],
             penalty: severity.score_impact(),
             tool_name: Some(tool.to_string()),
+            prompt_name: None,
             metadata: Map::new(),
         }
     }

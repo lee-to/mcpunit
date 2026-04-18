@@ -9,14 +9,15 @@
 //!   loud because [`REGISTRY`] is the only way anything reaches
 //!   [`crate::scoring`].
 //!
-//! Rules are grouped by [`FindingCategory`] into four sub-modules so a
-//! reader can see every identity rule, every schema rule, and so on in one
+//! Rules are grouped by [`FindingCategory`] into sub-modules so a reader
+//! can see every identity rule, every schema rule, and so on in one
 //! place:
 //!
 //! * [`identity`]    — 2 rules on tool names.
 //! * [`description`] — 2 rules on tool descriptions.
 //! * [`schema`]      — 4 rules on input schemas.
 //! * [`capability`]  — 9 rules on what the tool can actually do.
+//! * [`prompts`]     — 7 rules on the `prompts/list` surface.
 //!
 //! Adding a new rule is a three-step dance: implement the trait on a
 //! zero-sized struct in the right sub-module, add it to [`REGISTRY`], add
@@ -31,6 +32,7 @@ pub mod helpers;
 pub mod capability;
 pub mod description;
 pub mod identity;
+pub mod prompts;
 pub mod schema;
 
 /// A single audit check.
@@ -103,6 +105,33 @@ pub trait Rule: Sync {
             evidence,
             penalty: severity.score_impact(),
             tool_name,
+            prompt_name: None,
+            metadata,
+        }
+    }
+
+    /// Build a finding that targets a prompt rather than a tool. Mirrors
+    /// [`Rule::make_finding`] but routes the subject to `prompt_name`.
+    fn make_prompt_finding(
+        &self,
+        message: String,
+        evidence: Vec<String>,
+        prompt_name: Option<String>,
+        metadata: MetadataMap,
+    ) -> Finding {
+        let severity = self.severity();
+        Finding {
+            rule_id: self.id().to_string(),
+            level: severity,
+            message,
+            title: Some(self.title().to_string()),
+            category: self.category(),
+            risk_category: self.risk_category(),
+            bucket: self.bucket(),
+            evidence,
+            penalty: severity.score_impact(),
+            tool_name: None,
+            prompt_name,
             metadata,
         }
     }
@@ -132,6 +161,18 @@ pub const REGISTRY: &[&'static dyn Rule] = &[
     &capability::UnscopedWrite,
     &capability::DestructiveDescription,
     &capability::ResponseTooLarge,
+    // Prompt-surface rules are appended to the registry so the on-wire
+    // ordering of tool-surface findings is preserved for historical
+    // dashboards; adding entries before existing ones would shift every
+    // downstream iteration index. Within the prompt group, identity
+    // rules precede description rules to mirror the tool-group layout.
+    &prompts::DuplicatePromptNames,
+    &prompts::PromptNameNotSnakeCase,
+    &prompts::PromptDuplicateArgumentName,
+    &prompts::MissingPromptDescription,
+    &prompts::PromptDescriptionTooShort,
+    &prompts::PromptDescriptionMatchesName,
+    &prompts::PromptArgumentMissingDescription,
 ];
 
 /// Iterate the registry in declaration order.
@@ -196,18 +237,24 @@ mod tests {
     }
 
     #[test]
-    fn registry_has_seventeen_rules_in_declared_order() {
-        // 4 catalogue-hygiene rules (identity + description) +
-        // 4 schema rules + 9 capability rules = 17.
-        assert_eq!(REGISTRY.len(), 17);
+    fn registry_has_expected_rules_in_declared_order() {
+        // 4 catalogue-hygiene tool rules + 4 schema rules + 9 capability
+        // rules + 7 prompt rules = 24.
+        assert_eq!(REGISTRY.len(), 24);
 
         // Head: catalogue hygiene (identity + description interleaved).
         assert_eq!(REGISTRY[0].id(), "duplicate_tool_names");
         assert_eq!(REGISTRY[1].id(), "missing_tool_description");
         assert_eq!(REGISTRY[2].id(), "overly_generic_tool_name");
 
-        // Tail: the newest rule.
-        assert_eq!(REGISTRY.last().unwrap().id(), "response_too_large");
+        // Prompt rules land after every tool-surface rule so tool-focused
+        // on-wire indexes stay stable for dashboards that track them.
+        assert_eq!(REGISTRY[16].id(), "response_too_large");
+        assert_eq!(REGISTRY[17].id(), "prompt_duplicate_name");
+        assert_eq!(
+            REGISTRY.last().unwrap().id(),
+            "prompt_argument_missing_description"
+        );
     }
 
     #[test]
