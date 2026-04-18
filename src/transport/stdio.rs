@@ -515,15 +515,14 @@ impl Transport for StdioTransport {
             .ok_or_else(|| {
                 self.protocol_error("initialize result.capabilities must be an object")
             })?;
-        if !capabilities
+        // MCP servers may advertise any subset of tools/prompts/resources —
+        // record which is present so `scan` can skip `tools/list` for
+        // prompts-only or resources-only servers instead of treating them
+        // as a protocol violation.
+        let has_tools_capability = capabilities
             .get("tools")
             .map(Value::is_object)
-            .unwrap_or(false)
-        {
-            return Err(
-                self.protocol_error("server did not advertise tools capability during initialize")
-            );
-        }
+            .unwrap_or(false);
 
         let server_info = obj
             .get("serverInfo")
@@ -561,6 +560,7 @@ impl Transport for StdioTransport {
         info!(
             server = %server_name,
             protocol_version = %protocol_version,
+            has_tools_capability,
             "stdio initialize complete"
         );
 
@@ -569,6 +569,7 @@ impl Transport for StdioTransport {
             server_name: Some(server_name),
             server_version,
             instructions,
+            has_tools_capability,
             raw,
         })
     }

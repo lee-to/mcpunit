@@ -88,6 +88,55 @@ fn server_exit_before_response_raises_startup_error() {
 }
 
 #[test]
+fn prompts_only_server_scans_without_protocol_error() {
+    // Regression: MCP spec allows servers to advertise only `prompts`
+    // (or `resources`). Treating that as a protocol error rejected
+    // legitimate servers — now `scan` must succeed with an empty tool
+    // list and skip `tools/list` entirely.
+    let script = r#"
+set -e
+read _init
+printf '%s\n' '{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2025-11-25","capabilities":{"prompts":{}},"serverInfo":{"name":"prompts-only","version":"0.1.0"}}}'
+read _notif
+# No `tools/list` request must arrive; if the scanner sends one the
+# shell read below will consume it and the test will see a phantom
+# `.tools` entry. We reply with an error to make the regression loud.
+if IFS= read -r _unexpected; then
+    printf '%s\n' "{\"jsonrpc\":\"2.0\",\"id\":2,\"error\":{\"code\":-32601,\"message\":\"unexpected tools/list\"}}"
+fi
+"#;
+    let mut transport = StdioTransport::spawn(config(script)).unwrap();
+    let server = transport.scan("stdio:prompts-only".into()).unwrap();
+    assert_eq!(server.name.as_deref(), Some("prompts-only"));
+    assert!(
+        server.tools.is_empty(),
+        "prompts-only server must scan with no tools"
+    );
+    assert_eq!(
+        server.metadata.get("has_tools_capability"),
+        Some(&serde_json::Value::Bool(false)),
+        "metadata must surface that tools capability is absent"
+    );
+}
+
+#[test]
+fn resources_only_server_scans_without_protocol_error() {
+    let script = r#"
+set -e
+read _init
+printf '%s\n' '{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2025-11-25","capabilities":{"resources":{}},"serverInfo":{"name":"res-only","version":"0.1.0"}}}'
+read _notif
+"#;
+    let mut transport = StdioTransport::spawn(config(script)).unwrap();
+    let server = transport.scan("stdio:res-only".into()).unwrap();
+    assert!(server.tools.is_empty());
+    assert_eq!(
+        server.metadata.get("has_tools_capability"),
+        Some(&serde_json::Value::Bool(false))
+    );
+}
+
+#[test]
 fn repeated_cursor_is_rejected() {
     let script = r#"
 set -e

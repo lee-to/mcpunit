@@ -502,15 +502,14 @@ impl Transport for HttpTransport {
             .ok_or_else(|| {
                 Self::protocol_error("initialize result.capabilities must be an object")
             })?;
-        if !capabilities
+        // MCP servers may advertise any subset of tools/prompts/resources —
+        // record which is present so `scan` can skip `tools/list` for
+        // prompts-only or resources-only servers instead of treating them
+        // as a protocol violation.
+        let has_tools_capability = capabilities
             .get("tools")
             .map(Value::is_object)
-            .unwrap_or(false)
-        {
-            return Err(Self::protocol_error(
-                "server did not advertise tools capability during initialize",
-            ));
-        }
+            .unwrap_or(false);
 
         let server_info = obj
             .get("serverInfo")
@@ -550,6 +549,7 @@ impl Transport for HttpTransport {
         info!(
             server = %server_name,
             protocol_version = %protocol_version,
+            has_tools_capability,
             "http initialize complete"
         );
 
@@ -558,6 +558,7 @@ impl Transport for HttpTransport {
             server_name: Some(server_name),
             server_version,
             instructions,
+            has_tools_capability,
             raw,
         })
     }

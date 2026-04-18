@@ -98,6 +98,36 @@ fn scan_round_trips_sse_responses() {
 }
 
 #[test]
+fn prompts_only_server_scans_without_protocol_error() {
+    // Regression: MCP spec allows servers to advertise only `prompts`
+    // or `resources` without tools. The scan must succeed, skip
+    // `tools/list` entirely, and surface the missing capability via
+    // server metadata.
+    const PROMPTS_ONLY_INIT: &str = r#"{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2025-11-25","capabilities":{"prompts":{}},"serverInfo":{"name":"prompts-only","version":"0.1.0"}}}"#;
+    // Only two responses are queued — `initialize` and the
+    // `notifications/initialized` ack. If the transport erroneously
+    // issues `tools/list`, the mock will fail to accept the connection
+    // and the scan will surface a transport error.
+    let port = spawn_mock(vec![ok_json(PROMPTS_ONLY_INIT), ok_json("")]);
+    let mut transport = HttpTransport::new(
+        HttpConfig::new(format!("http://127.0.0.1:{port}/mcp"))
+            .with_timeout(Duration::from_secs(5)),
+    )
+    .unwrap();
+    let server = transport.scan("http:prompts-only".into()).unwrap();
+    assert_eq!(server.name.as_deref(), Some("prompts-only"));
+    assert!(
+        server.tools.is_empty(),
+        "prompts-only server must scan with no tools"
+    );
+    assert_eq!(
+        server.metadata.get("has_tools_capability"),
+        Some(&serde_json::Value::Bool(false)),
+        "metadata must surface that tools capability is absent"
+    );
+}
+
+#[test]
 fn non_2xx_response_surfaces_protocol_error() {
     let status =
         b"HTTP/1.1 503 Service Unavailable\r\nContent-Length: 9\r\nConnection: close\r\n\r\nbad stuff"

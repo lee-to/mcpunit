@@ -61,6 +61,11 @@ pub struct InitializeResult {
     pub server_name: Option<String>,
     pub server_version: Option<String>,
     pub instructions: Option<String>,
+    /// Whether the server advertised `capabilities.tools` in its initialize
+    /// response. MCP servers are free to advertise only `prompts` or
+    /// `resources`, so a missing tools capability is not a protocol error —
+    /// the default `scan` impl simply skips `tools/list` in that case.
+    pub has_tools_capability: bool,
     pub raw: serde_json::Value,
 }
 
@@ -91,7 +96,15 @@ pub trait Transport {
         let client_info = ClientInfo::default_for_crate();
         let init = self.initialize(client_info)?;
         self.notify_initialized()?;
-        let tools = self.list_tools()?;
+        let tools = if init.has_tools_capability {
+            self.list_tools()?
+        } else {
+            tracing::info!(
+                "server did not advertise tools capability — skipping tools/list; \
+                 tool-related rules will see an empty tool set"
+            );
+            Vec::new()
+        };
 
         let mut server = NormalizedServer::new(target);
         server.name = init.server_name.clone();
@@ -106,6 +119,10 @@ pub trait Transport {
         server.metadata.insert(
             "protocol_version".to_string(),
             serde_json::Value::String(init.protocol_version),
+        );
+        server.metadata.insert(
+            "has_tools_capability".to_string(),
+            serde_json::Value::Bool(init.has_tools_capability),
         );
         server.response_sizes.extend(self.take_response_sizes());
         Ok(server)
