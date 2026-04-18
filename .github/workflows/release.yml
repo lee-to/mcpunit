@@ -1,13 +1,16 @@
 name: Release
 
 # Triggered by a semver tag (`v2.0.0`, `v2.1.0-rc.1`, ...). Builds the
-# `mcpunit` binary on five platforms and publishes a GitHub Release with
+# `mcpunit` binary on seven platforms and publishes a GitHub Release with
 # each archive attached.
 #
-# Linux runners are pinned to `ubuntu-22.04` on purpose — that gives a
-# glibc-2.35 floor, which is the oldest still-supported LTS. Binaries
+# Linux glibc runners are pinned to `ubuntu-22.04` on purpose — that gives
+# a glibc-2.35 floor, which is the oldest still-supported LTS. Binaries
 # built there run on every newer Ubuntu / Debian 12+ / RHEL 9+ / modern
 # GitHub-hosted runner without symbol-version surprises.
+#
+# Linux musl builds are fully static and run on Alpine / distroless /
+# scratch images where the glibc dynamic loader is absent.
 
 on:
   push:
@@ -32,6 +35,19 @@ jobs:
             target: aarch64-unknown-linux-gnu
             artifact: mcpunit-aarch64-unknown-linux-gnu
             archive: tar.gz
+          # Static musl builds for Alpine / distroless / scratch images.
+          # Built via `cross` so the musl toolchain comes from a container
+          # and the runner doesn't need musl-cross-compile packages.
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-musl
+            artifact: mcpunit-x86_64-unknown-linux-musl
+            archive: tar.gz
+            use_cross: true
+          - os: ubuntu-22.04
+            target: aarch64-unknown-linux-musl
+            artifact: mcpunit-aarch64-unknown-linux-musl
+            archive: tar.gz
+            use_cross: true
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             artifact: mcpunit-x86_64-pc-windows-msvc
@@ -60,8 +76,18 @@ jobs:
           sudo apt-get install -y gcc-aarch64-linux-gnu
           echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> "$GITHUB_ENV"
 
+      - name: Install cross
+        if: matrix.use_cross
+        run: cargo install cross --locked --version 0.2.5
+
       - name: Build
-        run: cargo build --release --target ${{ matrix.target }}
+        shell: bash
+        run: |
+          if [ "${{ matrix.use_cross }}" = "true" ]; then
+            cross build --release --target ${{ matrix.target }}
+          else
+            cargo build --release --target ${{ matrix.target }}
+          fi
 
       - name: Assert binary size budget (<= 5 MiB)
         if: matrix.target == 'x86_64-unknown-linux-gnu'

@@ -96,13 +96,16 @@ Pick one:
 curl -L https://github.com/lee-to/mcpunit/releases/latest/download/mcpunit-x86_64-unknown-linux-gnu.tar.gz | tar -xz
 ./mcpunit --version
 
+# Alpine / distroless / scratch — use the static musl build
+curl -L https://github.com/lee-to/mcpunit/releases/latest/download/mcpunit-x86_64-unknown-linux-musl.tar.gz | tar -xz
+
 # Or build from source
 cargo install --git https://github.com/lee-to/mcpunit --locked
 ```
 
-Prebuilt binaries ship for Linux (x64 + arm64), macOS (Intel + Apple
-Silicon), and Windows — all statically linked, all **under 5 MB on
-disk**. See [releases](https://github.com/lee-to/mcpunit/releases).
+Prebuilt binaries ship for Linux (x64 + arm64, both **glibc** and static
+**musl** for Alpine), macOS (Intel + Apple Silicon), and Windows — all
+**under 5 MB on disk**. See [releases](https://github.com/lee-to/mcpunit/releases).
 
 ### 2. Test your MCP server
 

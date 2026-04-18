@@ -65,14 +65,17 @@ debug = true
 # pipeline lives in `.github/workflows/release.yml` and is hand-written so
 # a reader can follow it end-to-end without a generator in the loop.
 #
-# Linux targets use glibc (`-gnu`) because the binary is only ever
-# downloaded onto GitHub-hosted runners, all of which ship a modern glibc.
-# Static musl builds would add `cross` / `musl-tools` dependencies for no
-# real deployment win.
+# Linux ships both glibc (`-gnu`) and static musl (`-musl`) builds. The
+# glibc variant is the default for GitHub-hosted runners (Ubuntu, modern
+# Debian/RHEL). The musl variant is a fully static binary for Alpine,
+# distroless, and scratch-based container images where the glibc loader
+# is absent (`sh: mcpunit: not found`).
 [package.metadata.dist]
 targets = [
     "x86_64-unknown-linux-gnu",
     "aarch64-unknown-linux-gnu",
+    "x86_64-unknown-linux-musl",
+    "aarch64-unknown-linux-musl",
     "x86_64-apple-darwin",
     "aarch64-apple-darwin",
     "x86_64-pc-windows-msvc",
