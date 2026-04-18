@@ -18,6 +18,8 @@
 //!   are not a general-purpose escape routine; do not pass arbitrary user
 //!   data through them.
 
+use std::collections::HashSet;
+
 use crate::models::NormalizedTool;
 use serde_json::Value;
 
@@ -217,12 +219,23 @@ pub fn has_scope_hint(description: Option<&str>, schema: &Value) -> bool {
 
 /// Return whether the tool name or description contains any inputful
 /// marker (input, payload, send, submit, ...).
+///
+/// Matches on **whole alphanumeric tokens**, not substrings — otherwise a
+/// description like `"Get workspace metadata"` would match the `data`
+/// marker inside `metadata` and produce a spurious
+/// `weak_input_schema` / `schema_too_lax` finding on a tool that has a
+/// deliberately empty-but-strict schema (see
+/// https://github.com/lee-to/mcpunit/issues — reported against the
+/// `workspace_context` tool in a real MCP server).
 pub fn looks_like_inputful_tool(name: &str, description: Option<&str>) -> bool {
-    let name_lower = name.trim().to_ascii_lowercase();
+    let mut haystack = name.trim().to_ascii_lowercase();
     let desc_lower = normalize_text(description);
-    INPUTFUL_TOOL_MARKERS
-        .iter()
-        .any(|m| name_lower.contains(m) || desc_lower.contains(m))
+    if !desc_lower.is_empty() {
+        haystack.push(' ');
+        haystack.push_str(&desc_lower);
+    }
+    let tokens: HashSet<String> = alnum_tokens(&haystack).into_iter().collect();
+    INPUTFUL_TOOL_MARKERS.iter().any(|m| tokens.contains(*m))
 }
 
 // ---------- Single-quoted repr helpers -------------------------------------
@@ -367,6 +380,31 @@ mod tests {
         assert!(looks_like_inputful_tool("submit_form", None));
         assert!(looks_like_inputful_tool("any", Some("send a payload")));
         assert!(!looks_like_inputful_tool("abc", Some("static")));
+    }
+
+    #[test]
+    fn looks_like_inputful_tool_requires_whole_token_match() {
+        // Regression: previously `"metadata".contains("data")` would match
+        // the `data` marker as a substring and spuriously flag tools with
+        // a deliberately empty-but-strict schema — observed on the
+        // `workspace_context` tool of a real MCP server whose description
+        // reads "Get workspace metadata...". Whole-token matching must
+        // reject substring hits while still catching legitimate inputful
+        // markers that appear as their own words.
+        assert!(!looks_like_inputful_tool(
+            "workspace_context",
+            Some("Get workspace metadata: projects, groups, shared items list"),
+        ));
+        // `database` contains `data` as substring; must not match either.
+        assert!(!looks_like_inputful_tool(
+            "connect_database",
+            Some("Establish a database connection"),
+        ));
+        // Sanity: legitimate token matches still fire.
+        assert!(looks_like_inputful_tool(
+            "post_message",
+            Some("Send a body to the endpoint"),
+        ));
     }
 
     #[test]
