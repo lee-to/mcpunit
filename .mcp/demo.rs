@@ -89,15 +89,17 @@ fn main() -> io::Result<()> {
                     &json!({"jsonrpc": "2.0", "id": request_id, "result": {}}),
                 )?;
             }
-            Some(other) => {
-                if request_id.is_some() {
-                    send_error(
-                        &mut stdout,
-                        request_id,
-                        -32601,
-                        &format!("Unknown method: {other}"),
-                    )?;
-                }
+            Some(other) if request_id.is_some() => {
+                send_error(
+                    &mut stdout,
+                    request_id,
+                    -32601,
+                    &format!("Unknown method: {other}"),
+                )?;
+            }
+            Some(_) => {
+                // Notification for an unknown method — JSON-RPC says we
+                // must not reply to notifications, so silently ignore.
             }
             None => {
                 // Notification with no method — ignore.
