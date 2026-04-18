@@ -13,7 +13,7 @@ inputs:
       version this action.yml was shipped with. Pinning a specific tag
       keeps CI hermetic.
     required: false
-    default: v1.0.2
+    default: v1.1.0
   cmd:
     description: >-
       Subprocess command used to start the MCP server over stdio. Ignored

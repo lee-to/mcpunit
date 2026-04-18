@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "mcpunit",
-          "semanticVersion": "1.0.2",
+          "semanticVersion": "1.1.0",
           "rules": [
             {
               "id": "duplicate_tool_names",
@@ -513,6 +513,219 @@
                 "bucket": "ergonomics",
                 "score_impact": 10
               }
+            },
+            {
+              "id": "prompt_duplicate_name",
+              "name": "Duplicate prompt names",
+              "shortDescription": {
+                "text": "Duplicate prompt names"
+              },
+              "fullDescription": {
+                "text": "Prompt names should be unique within one MCP server."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Prompt names should be unique within one MCP server. Severity: error. Score impact: 20."
+              },
+              "properties": {
+                "tags": [
+                  "prompts",
+                  "identity",
+                  "prompt-identity",
+                  "metadata_hygiene",
+                  "conformance"
+                ],
+                "precision": "medium",
+                "problem.severity": "error",
+                "risk_category": "metadata_hygiene",
+                "bucket": "conformance",
+                "score_impact": 20
+              }
+            },
+            {
+              "id": "prompt_name_not_snake_case",
+              "name": "Prompt name not snake_case",
+              "shortDescription": {
+                "text": "Prompt name not snake_case"
+              },
+              "fullDescription": {
+                "text": "Prompt names should match `[a-z][a-z0-9_]*` to stay compatible with client-side identifier derivations."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Prompt names should match `[a-z][a-z0-9_]*` to stay compatible with client-side identifier derivations. Severity: warning. Score impact: 10."
+              },
+              "properties": {
+                "tags": [
+                  "prompts",
+                  "identity",
+                  "naming",
+                  "prompt-identity",
+                  "metadata_hygiene",
+                  "ergonomics"
+                ],
+                "precision": "medium",
+                "problem.severity": "warning",
+                "risk_category": "metadata_hygiene",
+                "bucket": "ergonomics",
+                "score_impact": 10
+              }
+            },
+            {
+              "id": "prompt_duplicate_argument_name",
+              "name": "Duplicate prompt argument name",
+              "shortDescription": {
+                "text": "Duplicate prompt argument name"
+              },
+              "fullDescription": {
+                "text": "Argument names must be unique within a single prompt so client-side dictionaries do not silently overwrite values."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Argument names must be unique within a single prompt so client-side dictionaries do not silently overwrite values. Severity: error. Score impact: 20."
+              },
+              "properties": {
+                "tags": [
+                  "prompts",
+                  "identity",
+                  "arguments",
+                  "prompt-identity",
+                  "metadata_hygiene",
+                  "conformance"
+                ],
+                "precision": "medium",
+                "problem.severity": "error",
+                "risk_category": "metadata_hygiene",
+                "bucket": "conformance",
+                "score_impact": 20
+              }
+            },
+            {
+              "id": "prompt_missing_description",
+              "name": "Prompt missing description",
+              "shortDescription": {
+                "text": "Prompt missing description"
+              },
+              "fullDescription": {
+                "text": "Prompts without descriptions force the agent to guess intent from the name alone."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Prompts without descriptions force the agent to guess intent from the name alone. Severity: error. Score impact: 20."
+              },
+              "properties": {
+                "tags": [
+                  "prompts",
+                  "description",
+                  "prompt-description",
+                  "metadata_hygiene",
+                  "metadata"
+                ],
+                "precision": "medium",
+                "problem.severity": "error",
+                "risk_category": "metadata_hygiene",
+                "bucket": "metadata",
+                "score_impact": 20
+              }
+            },
+            {
+              "id": "prompt_description_too_short",
+              "name": "Prompt description too short",
+              "shortDescription": {
+                "text": "Prompt description too short"
+              },
+              "fullDescription": {
+                "text": "Very short descriptions do not give the agent enough signal to pick the right prompt."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Very short descriptions do not give the agent enough signal to pick the right prompt. Severity: warning. Score impact: 10."
+              },
+              "properties": {
+                "tags": [
+                  "prompts",
+                  "description",
+                  "prompt-description",
+                  "metadata_hygiene",
+                  "metadata"
+                ],
+                "precision": "medium",
+                "problem.severity": "warning",
+                "risk_category": "metadata_hygiene",
+                "bucket": "metadata",
+                "score_impact": 10
+              }
+            },
+            {
+              "id": "prompt_description_matches_name",
+              "name": "Prompt description restates the name",
+              "shortDescription": {
+                "text": "Prompt description restates the name"
+              },
+              "fullDescription": {
+                "text": "Descriptions should add information beyond the prompt's identifier."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Descriptions should add information beyond the prompt's identifier. Severity: warning. Score impact: 10."
+              },
+              "properties": {
+                "tags": [
+                  "prompts",
+                  "description",
+                  "prompt-description",
+                  "metadata_hygiene",
+                  "metadata"
+                ],
+                "precision": "medium",
+                "problem.severity": "warning",
+                "risk_category": "metadata_hygiene",
+                "bucket": "metadata",
+                "score_impact": 10
+              }
+            },
+            {
+              "id": "prompt_argument_missing_description",
+              "name": "Prompt argument missing description",
+              "shortDescription": {
+                "text": "Prompt argument missing description"
+              },
+              "fullDescription": {
+                "text": "Agents have no way to fill prompt arguments correctly if each is undocumented."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Agents have no way to fill prompt arguments correctly if each is undocumented. Severity: warning. Score impact: 10."
+              },
+              "properties": {
+                "tags": [
+                  "prompts",
+                  "description",
+                  "arguments",
+                  "prompt-description",
+                  "metadata_hygiene",
+                  "metadata"
+                ],
+                "precision": "medium",
+                "problem.severity": "warning",
+                "risk_category": "metadata_hygiene",
+                "bucket": "metadata",
+                "score_impact": 10
+              }
             }
           ]
         }
@@ -520,7 +733,7 @@
       "invocations": [
         {
           "executionSuccessful": true,
-          "endTimeUtc": "2026-04-18T10:09:07.225973+00:00",
+          "endTimeUtc": "2026-04-18T17:17:33.186785+00:00",
           "workingDirectory": {
             "uri": "file:///Users/macos/Projects/2080/mcpunit"
           }
@@ -531,8 +744,8 @@
         "tool_name": "mcpunit",
         "report_schema_id": "https://mcpunit.cutcode.dev/schema/audit/v1",
         "report_schema_version": "1",
-        "scan_timestamp": "2026-04-18T10:09:07.225973+00:00",
-        "total_score": 10,
+        "scan_timestamp": "2026-04-18T17:17:33.186785+00:00",
+        "total_score": 0,
         "category_scores": {
           "conformance": {
             "score": 90,
@@ -553,10 +766,10 @@
             "finding_count": 4
           },
           "metadata": {
-            "score": 100,
+            "score": 70,
             "max_score": 100,
-            "penalty_points": 0,
-            "finding_count": 0
+            "penalty_points": 30,
+            "finding_count": 2
           }
         },
         "why_this_score": "Score is driven mainly by security findings in command execution and file system and ergonomics findings.",
@@ -902,6 +1115,101 @@
           ],
           "rule": {
             "id": "write_tool_without_scope_hint"
+          }
+        },
+        {
+          "ruleId": "prompt_missing_description",
+          "ruleIndex": 20,
+          "level": "error",
+          "message": {
+            "text": "Prompt 'summarize' has no description."
+          },
+          "partialFingerprints": {
+            "primaryLocationLineHash": "ff48b3d1f85ea07420e37b9f2ea3a49929263d0507ea0c0a1302065cfe6961b5"
+          },
+          "properties": {
+            "risk_category": "metadata_hygiene",
+            "bucket": "metadata",
+            "score_impact": 20,
+            "tool_name": null,
+            "finding_category": "prompt-description",
+            "evidence": [
+              "prompt_name=summarize"
+            ],
+            "check_title": "Prompt missing description",
+            "check_rationale": "Prompts without descriptions force the agent to guess intent from the name alone."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mcp-server://stdio:[\"./target/release/examples/demo\"]"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              },
+              "logicalLocations": [
+                {
+                  "name": "stdio:[\"./target/release/examples/demo\"]",
+                  "kind": "module"
+                }
+              ],
+              "message": {
+                "text": "prompt_name=summarize"
+              }
+            }
+          ],
+          "rule": {
+            "id": "prompt_missing_description"
+          }
+        },
+        {
+          "ruleId": "prompt_argument_missing_description",
+          "ruleIndex": 23,
+          "level": "warning",
+          "message": {
+            "text": "Prompt 'translate' has 1 argument(s) without description."
+          },
+          "partialFingerprints": {
+            "primaryLocationLineHash": "260d8a1fbac8a0f2186fdbd9adeb45e90fdd83e911be895ddcc6e63b4fa33259"
+          },
+          "properties": {
+            "risk_category": "metadata_hygiene",
+            "bucket": "metadata",
+            "score_impact": 10,
+            "tool_name": null,
+            "finding_category": "prompt-description",
+            "evidence": [
+              "prompt_name=translate",
+              "arguments_missing_description=['lang']"
+            ],
+            "check_title": "Prompt argument missing description",
+            "check_rationale": "Agents have no way to fill prompt arguments correctly if each is undocumented."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mcp-server://stdio:[\"./target/release/examples/demo\"]"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              },
+              "logicalLocations": [
+                {
+                  "name": "stdio:[\"./target/release/examples/demo\"]",
+                  "kind": "module"
+                }
+              ],
+              "message": {
+                "text": "prompt_name=translate"
+              }
+            }
+          ],
+          "rule": {
+            "id": "prompt_argument_missing_description"
           }
         }
       ]
