@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "mcpunit",
-          "semanticVersion": "1.0.0",
+          "semanticVersion": "1.0.2",
           "rules": [
             {
               "id": "duplicate_tool_names",
@@ -520,7 +520,7 @@
       "invocations": [
         {
           "executionSuccessful": true,
-          "endTimeUtc": "2026-04-11T18:06:14.015630+00:00",
+          "endTimeUtc": "2026-04-18T10:09:07.225973+00:00",
           "workingDirectory": {
             "uri": "file:///Users/macos/Projects/2080/mcpunit"
           }
@@ -531,7 +531,7 @@
         "tool_name": "mcpunit",
         "report_schema_id": "https://mcpunit.cutcode.dev/schema/audit/v1",
         "report_schema_version": "1",
-        "scan_timestamp": "2026-04-11T18:06:14.015630+00:00",
+        "scan_timestamp": "2026-04-18T10:09:07.225973+00:00",
         "total_score": 10,
         "category_scores": {
           "conformance": {
@@ -588,6 +588,27 @@
             "check_title": "Overly generic tool name",
             "check_rationale": "Tool names should communicate behavior clearly."
           },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mcp-tool://do_it"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              },
+              "logicalLocations": [
+                {
+                  "name": "do_it",
+                  "kind": "function"
+                }
+              ],
+              "message": {
+                "text": "tool_name='do_it'"
+              }
+            }
+          ],
           "rule": {
             "id": "overly_generic_tool_name"
           }
@@ -616,6 +637,27 @@
             "check_title": "Vague tool description",
             "check_rationale": "Tool descriptions should clearly explain what the tool does."
           },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mcp-tool://do_it"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              },
+              "logicalLocations": [
+                {
+                  "name": "do_it",
+                  "kind": "function"
+                }
+              ],
+              "message": {
+                "text": "description='Helps with stuff.'"
+              }
+            }
+          ],
           "rule": {
             "id": "vague_tool_description"
           }
@@ -643,6 +685,27 @@
             "check_title": "Schema allows arbitrary properties",
             "check_rationale": "Tool input schemas should not allow arbitrary top-level properties."
           },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mcp-tool://debug_payload"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              },
+              "logicalLocations": [
+                {
+                  "name": "debug_payload",
+                  "kind": "function"
+                }
+              ],
+              "message": {
+                "text": "additionalProperties=True"
+              }
+            }
+          ],
           "rule": {
             "id": "schema_allows_arbitrary_properties"
           }
@@ -669,6 +732,27 @@
             "check_title": "Weak input schema",
             "check_rationale": "Tool input schemas should constrain free-form payloads clearly."
           },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mcp-tool://debug_payload"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              },
+              "logicalLocations": [
+                {
+                  "name": "debug_payload",
+                  "kind": "function"
+                }
+              ],
+              "message": {
+                "text": "matched_heuristic=inputful_tool_with_empty_object_schema"
+              }
+            }
+          ],
           "rule": {
             "id": "weak_input_schema"
           }
@@ -697,6 +781,27 @@
             "check_title": "Dangerous execution tool",
             "check_rationale": "Tools that execute host shell commands are high risk."
           },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mcp-tool://exec_command"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              },
+              "logicalLocations": [
+                {
+                  "name": "exec_command",
+                  "kind": "function"
+                }
+              ],
+              "message": {
+                "text": "name_markers=['exec', 'command']"
+              }
+            }
+          ],
           "rule": {
             "id": "dangerous_exec_tool"
           }
@@ -726,6 +831,27 @@
             "check_title": "Dangerous filesystem write tool",
             "check_rationale": "Tools that write files on disk are high risk."
           },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mcp-tool://write_file"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              },
+              "logicalLocations": [
+                {
+                  "name": "write_file",
+                  "kind": "function"
+                }
+              ],
+              "message": {
+                "text": "write_markers=['write']"
+              }
+            }
+          ],
           "rule": {
             "id": "dangerous_fs_write_tool"
           }
@@ -753,6 +879,27 @@
             "check_title": "Write tool without scope hint",
             "check_rationale": "Filesystem mutation tools should document scope constraints clearly."
           },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mcp-tool://write_file"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              },
+              "logicalLocations": [
+                {
+                  "name": "write_file",
+                  "kind": "function"
+                }
+              ],
+              "message": {
+                "text": "path_keys=['path']"
+              }
+            }
+          ],
           "rule": {
             "id": "write_tool_without_scope_hint"
           }

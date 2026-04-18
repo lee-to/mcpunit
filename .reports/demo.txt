@@ -1,9 +1,9 @@
-Generator: mcpunit (mcpunit 1.0.0)
+Generator: mcpunit (mcpunit 1.0.2)
 Report Schema: https://mcpunit.cutcode.dev/schema/audit/v1@1
-Scan Timestamp: 2026-04-11T18:06:14.015630+00:00
+Scan Timestamp: 2026-04-18T10:09:07.225973+00:00
 Server: mcpunit demo server
 Version: 0.1.0
-Target: stdio:["target/release/examples/demo"]
+Target: stdio:["./target/release/examples/demo"]
 Target Description: Local MCP server launched over stdio.
 Tools: 4
 Finding Counts: total=7, error=2, warning=5, info=0

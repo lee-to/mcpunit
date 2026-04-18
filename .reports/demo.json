@@ -4,13 +4,13 @@
     "version": "1",
     "generator": {
       "name": "mcpunit",
-      "version": "1.0.0"
+      "version": "1.0.2"
     }
   },
-  "scan": {
-    "timestamp": "2026-04-11T18:06:14.015630+00:00",
+  "test": {
+    "timestamp": "2026-04-18T10:09:07.225973+00:00",
     "target": {
-      "raw": "stdio:[\"target/release/examples/demo\"]",
+      "raw": "stdio:[\"./target/release/examples/demo\"]",
       "transport": "stdio",
       "description": "Local MCP server launched over stdio.",
       "server": {
@@ -19,6 +19,7 @@
         "protocol_version": null
       },
       "metadata": {
+        "has_tools_capability": true,
         "instructions": "Demo server used by mcpunit to regenerate the reports under `.reports/`.",
         "protocol_version": "2025-11-25"
       }

@@ -1,6 +1,6 @@
 [package]
 name = "mcpunit"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2021"
 rust-version = "1.75"
 authors = ["Danil Shutsky <thecutcode@gmail.com>"]
