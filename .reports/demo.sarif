@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "mcpunit",
-          "semanticVersion": "1.1.0",
+          "semanticVersion": "1.2.0",
           "rules": [
             {
               "id": "duplicate_tool_names",
@@ -545,37 +545,6 @@
               }
             },
             {
-              "id": "prompt_name_not_snake_case",
-              "name": "Prompt name not snake_case",
-              "shortDescription": {
-                "text": "Prompt name not snake_case"
-              },
-              "fullDescription": {
-                "text": "Prompt names should match `[a-z][a-z0-9_]*` to stay compatible with client-side identifier derivations."
-              },
-              "defaultConfiguration": {
-                "level": "warning"
-              },
-              "help": {
-                "text": "Prompt names should match `[a-z][a-z0-9_]*` to stay compatible with client-side identifier derivations. Severity: warning. Score impact: 10."
-              },
-              "properties": {
-                "tags": [
-                  "prompts",
-                  "identity",
-                  "naming",
-                  "prompt-identity",
-                  "metadata_hygiene",
-                  "ergonomics"
-                ],
-                "precision": "medium",
-                "problem.severity": "warning",
-                "risk_category": "metadata_hygiene",
-                "bucket": "ergonomics",
-                "score_impact": 10
-              }
-            },
-            {
               "id": "prompt_duplicate_argument_name",
               "name": "Duplicate prompt argument name",
               "shortDescription": {
@@ -616,10 +585,10 @@
                 "text": "Prompts without descriptions force the agent to guess intent from the name alone."
               },
               "defaultConfiguration": {
-                "level": "error"
+                "level": "warning"
               },
               "help": {
-                "text": "Prompts without descriptions force the agent to guess intent from the name alone. Severity: error. Score impact: 20."
+                "text": "Prompts without descriptions force the agent to guess intent from the name alone. Severity: warning. Score impact: 10."
               },
               "properties": {
                 "tags": [
@@ -630,10 +599,10 @@
                   "metadata"
                 ],
                 "precision": "medium",
-                "problem.severity": "error",
+                "problem.severity": "warning",
                 "risk_category": "metadata_hygiene",
                 "bucket": "metadata",
-                "score_impact": 20
+                "score_impact": 10
               }
             },
             {
@@ -733,7 +702,7 @@
       "invocations": [
         {
           "executionSuccessful": true,
-          "endTimeUtc": "2026-04-18T17:17:33.186785+00:00",
+          "endTimeUtc": "2026-04-20T09:55:10.459331+00:00",
           "workingDirectory": {
             "uri": "file:///Users/macos/Projects/2080/mcpunit"
           }
@@ -744,7 +713,7 @@
         "tool_name": "mcpunit",
         "report_schema_id": "https://mcpunit.cutcode.dev/schema/audit/v1",
         "report_schema_version": "1",
-        "scan_timestamp": "2026-04-18T17:17:33.186785+00:00",
+        "scan_timestamp": "2026-04-20T09:55:10.459331+00:00",
         "total_score": 0,
         "category_scores": {
           "conformance": {
@@ -766,9 +735,9 @@
             "finding_count": 4
           },
           "metadata": {
-            "score": 70,
+            "score": 80,
             "max_score": 100,
-            "penalty_points": 30,
+            "penalty_points": 20,
             "finding_count": 2
           }
         },
@@ -1119,8 +1088,8 @@
         },
         {
           "ruleId": "prompt_missing_description",
-          "ruleIndex": 20,
-          "level": "error",
+          "ruleIndex": 19,
+          "level": "warning",
           "message": {
             "text": "Prompt 'summarize' has no description."
           },
@@ -1130,7 +1099,7 @@
           "properties": {
             "risk_category": "metadata_hygiene",
             "bucket": "metadata",
-            "score_impact": 20,
+            "score_impact": 10,
             "tool_name": null,
             "finding_category": "prompt-description",
             "evidence": [
@@ -1166,7 +1135,7 @@
         },
         {
           "ruleId": "prompt_argument_missing_description",
-          "ruleIndex": 23,
+          "ruleIndex": 22,
           "level": "warning",
           "message": {
             "text": "Prompt 'translate' has 1 argument(s) without description."

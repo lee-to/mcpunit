@@ -1,12 +1,12 @@
-Generator: mcpunit (mcpunit 1.1.0)
+Generator: mcpunit (mcpunit 1.2.0)
 Report Schema: https://mcpunit.cutcode.dev/schema/audit/v1@1
-Scan Timestamp: 2026-04-18T17:17:33.186785+00:00
+Scan Timestamp: 2026-04-20T09:55:10.459331+00:00
 Server: mcpunit demo server
 Version: 0.1.0
 Target: stdio:["./target/release/examples/demo"]
 Target Description: Local MCP server launched over stdio.
 Tools: 4
-Finding Counts: total=9, error=3, warning=6, info=0
+Finding Counts: total=9, error=2, warning=7, info=0
 Total Score: 0/100
 Why This Score: Score is driven mainly by security findings in command execution and file system and ergonomics findings.
 Score Meaning: Deterministic CI-first quality audit based on conformance, security-relevant capabilities, ergonomics, and metadata hygiene.
@@ -14,7 +14,7 @@ Category Scores:
 - conformance: 90/100 (findings: 1, penalties: 10)
 - security: 60/100 (findings: 2, penalties: 40)
 - ergonomics: 60/100 (findings: 4, penalties: 40)
-- metadata: 70/100 (findings: 2, penalties: 30)
+- metadata: 80/100 (findings: 2, penalties: 20)
 Findings By Bucket:
 - security: 2 findings, penalties: 40
   - ERROR dangerous_exec_tool [tool:exec_command]: Tool 'exec_command' appears to expose host command execution.
@@ -24,8 +24,8 @@ Findings By Bucket:
   - WARNING overly_generic_tool_name [tool:do_it]: Tool 'do_it' uses an overly generic name that hides its behavior.
   - WARNING vague_tool_description [tool:do_it]: Tool 'do_it' uses a vague description that does not explain its behavior clearly.
   - WARNING write_tool_without_scope_hint [tool:write_file]: Tool 'write_file' modifies the filesystem without any visible scope hint.
-- metadata: 2 findings, penalties: 30
-  - ERROR prompt_missing_description [prompt:summarize]: Prompt 'summarize' has no description.
+- metadata: 2 findings, penalties: 20
+  - WARNING prompt_missing_description [prompt:summarize]: Prompt 'summarize' has no description.
   - WARNING prompt_argument_missing_description [prompt:translate]: Prompt 'translate' has 1 argument(s) without description.
 - conformance: 1 finding, penalties: 10
   - WARNING schema_allows_arbitrary_properties [tool:debug_payload]: Tool 'debug_payload' allows arbitrary additional input properties.

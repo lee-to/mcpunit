@@ -4,11 +4,11 @@
     "version": "1",
     "generator": {
       "name": "mcpunit",
-      "version": "1.1.0"
+      "version": "1.2.0"
     }
   },
   "test": {
-    "timestamp": "2026-04-18T17:17:33.186785+00:00",
+    "timestamp": "2026-04-20T09:55:10.459331+00:00",
     "target": {
       "raw": "stdio:[\"./target/release/examples/demo\"]",
       "transport": "stdio",
@@ -108,7 +108,7 @@
     "total_score": {
       "value": 0,
       "max": 100,
-      "penalty_points": 120
+      "penalty_points": 110
     },
     "category_scores": {
       "conformance": {
@@ -143,12 +143,12 @@
         }
       },
       "metadata": {
-        "score": 70,
+        "score": 80,
         "max_score": 100,
-        "penalty_points": 30,
+        "penalty_points": 20,
         "finding_count": 2,
         "rule_penalties": {
-          "prompt_missing_description": 20,
+          "prompt_missing_description": 10,
           "prompt_argument_missing_description": 10
         }
       }
@@ -157,8 +157,8 @@
       "total": 9,
       "by_severity": {
         "info": 0,
-        "warning": 6,
-        "error": 3
+        "warning": 7,
+        "error": 2
       },
       "by_bucket": {
         "security": {
@@ -171,7 +171,7 @@
         },
         "metadata": {
           "finding_count": 2,
-          "penalty_points": 30
+          "penalty_points": 20
         },
         "conformance": {
           "finding_count": 1,
@@ -445,21 +445,6 @@
       ]
     },
     {
-      "id": "prompt_name_not_snake_case",
-      "title": "Prompt name not snake_case",
-      "bucket": "ergonomics",
-      "severity": "warning",
-      "rationale": "Prompt names should match `[a-z][a-z0-9_]*` to stay compatible with client-side identifier derivations.",
-      "category": "prompt-identity",
-      "risk_category": "metadata_hygiene",
-      "score_impact": 10,
-      "tags": [
-        "prompts",
-        "identity",
-        "naming"
-      ]
-    },
-    {
       "id": "prompt_duplicate_argument_name",
       "title": "Duplicate prompt argument name",
       "bucket": "conformance",
@@ -478,11 +463,11 @@
       "id": "prompt_missing_description",
       "title": "Prompt missing description",
       "bucket": "metadata",
-      "severity": "error",
+      "severity": "warning",
       "rationale": "Prompts without descriptions force the agent to guess intent from the name alone.",
       "category": "prompt-description",
       "risk_category": "metadata_hygiene",
-      "score_impact": 20,
+      "score_impact": 10,
       "tags": [
         "prompts",
         "description"
@@ -651,7 +636,7 @@
       "rule_id": "prompt_missing_description",
       "title": "Prompt missing description",
       "bucket": "metadata",
-      "severity": "error",
+      "severity": "warning",
       "rationale": "Prompts without descriptions force the agent to guess intent from the name alone.",
       "category": "prompt-description",
       "risk_category": "metadata_hygiene",
@@ -660,7 +645,7 @@
       "evidence": [
         "prompt_name=summarize"
       ],
-      "score_impact": 20
+      "score_impact": 10
     },
     {
       "rule_id": "prompt_argument_missing_description",
@@ -766,18 +751,18 @@
       "bucket": "metadata",
       "label": "metadata",
       "finding_count": 2,
-      "penalty_points": 30,
+      "penalty_points": 20,
       "findings": [
         {
           "id": "prompt_missing_description",
           "title": "Prompt missing description",
-          "severity": "error",
+          "severity": "warning",
           "bucket": "metadata",
           "risk_category": "metadata_hygiene",
           "tool_name": null,
           "rationale": "Prompts without descriptions force the agent to guess intent from the name alone.",
           "message": "Prompt 'summarize' has no description.",
-          "score_impact": 20
+          "score_impact": 10
         },
         {
           "id": "prompt_argument_missing_description",
