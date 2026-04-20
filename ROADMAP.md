@@ -18,9 +18,8 @@ priority reacts to user feedback.
 
 - Discover prompts via `prompts/list` when the server advertises
   `capabilities.prompts`.
-- 7 rules on prompt hygiene: duplicate name, snake_case, duplicate
-  argument, missing/too-short/name-matching description, undocumented
-  arguments.
+- 6 rules on prompt hygiene: duplicate name, duplicate argument,
+  missing/too-short/name-matching description, undocumented arguments.
 - `Finding.prompt_name` field; terminal and markdown reporters tag
   findings with `[tool:<name>]` or `[prompt:<name>]`.
 - Alpine / musl static binaries in the release matrix.

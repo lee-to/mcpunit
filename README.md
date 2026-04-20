@@ -254,12 +254,11 @@ Quick reference:
 | 16 | `tool_description_mentions_destructive_access` | `WARNING` | metadata |
 | 17 | `response_too_large` | `WARNING` / `ERROR` | ergonomics |
 | 18 | `prompt_duplicate_name` | `ERROR` | conformance |
-| 19 | `prompt_name_not_snake_case` | `WARNING` | ergonomics |
-| 20 | `prompt_duplicate_argument_name` | `ERROR` | conformance |
-| 21 | `prompt_missing_description` | `ERROR` | metadata |
-| 22 | `prompt_description_too_short` | `WARNING` | metadata |
-| 23 | `prompt_description_matches_name` | `WARNING` | metadata |
-| 24 | `prompt_argument_missing_description` | `WARNING` | metadata |
+| 19 | `prompt_duplicate_argument_name` | `ERROR` | conformance |
+| 20 | `prompt_missing_description` | `WARNING` | metadata |
+| 21 | `prompt_description_too_short` | `WARNING` | metadata |
+| 22 | `prompt_description_matches_name` | `WARNING` | metadata |
+| 23 | `prompt_argument_missing_description` | `WARNING` | metadata |
 
 Deep dive by category follows.
 
@@ -523,19 +522,6 @@ a bug. Same cost structure as duplicate tool names.
 
 **Example evidence:** `duplicate_count=2`, `prompt_name=summarize`.
 
-#### `prompt_name_not_snake_case` — `WARNING`
-
-**What it catches.** Names that do not match `[a-z][a-z0-9_]*`:
-`CamelCase`, `kebab-case`, `with.dot`, `with space`, names that start
-with a digit.
-
-**Why it matters.** Clients routinely derive identifiers from the
-prompt name (config keys, URL path segments, typed bindings). Anything
-that is not a plain snake_case identifier has been observed to break
-one or another MCP client in production.
-
-**How to fix:** rename to `[a-z][a-z0-9_]*`.
-
 #### `prompt_duplicate_argument_name` — `ERROR`
 
 **What it catches.** A single prompt that declares two or more
@@ -546,14 +532,15 @@ by name when invoking `prompts/get`. Duplicates silently overwrite
 each other, and the call fails or returns garbage. The MCP spec
 implies per-prompt argument uniqueness; this rule enforces it.
 
-#### `prompt_missing_description` — `ERROR`
+#### `prompt_missing_description` — `WARNING`
 
 **What it catches.** Prompts with no `description` field, or one that
 is empty after trimming.
 
-**Why it matters.** Without a description the agent has only the
-prompt name to infer intent from — exactly the same blind-guessing
-problem that `missing_tool_description` addresses for tools.
+**Why it matters.** The MCP spec marks `description` as optional, so
+this is hygiene rather than conformance — but without a description
+the agent has only the prompt name to infer intent from, the same
+blind-guessing problem `missing_tool_description` flags for tools.
 
 #### `prompt_description_too_short` — `WARNING`
 

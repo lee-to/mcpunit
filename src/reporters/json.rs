@@ -408,7 +408,7 @@ mod tests {
         let out = JsonReporter.render(&report);
         let parsed: Value = serde_json::from_str(out.trim_end()).unwrap();
         let rules = parsed["rules"].as_array().unwrap();
-        assert_eq!(rules.len(), 24);
+        assert_eq!(rules.len(), 23);
     }
 
     #[test]

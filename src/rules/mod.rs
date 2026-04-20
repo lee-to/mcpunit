@@ -167,7 +167,6 @@ pub const REGISTRY: &[&'static dyn Rule] = &[
     // downstream iteration index. Within the prompt group, identity
     // rules precede description rules to mirror the tool-group layout.
     &prompts::DuplicatePromptNames,
-    &prompts::PromptNameNotSnakeCase,
     &prompts::PromptDuplicateArgumentName,
     &prompts::MissingPromptDescription,
     &prompts::PromptDescriptionTooShort,
@@ -239,8 +238,8 @@ mod tests {
     #[test]
     fn registry_has_expected_rules_in_declared_order() {
         // 4 catalogue-hygiene tool rules + 4 schema rules + 9 capability
-        // rules + 7 prompt rules = 24.
-        assert_eq!(REGISTRY.len(), 24);
+        // rules + 6 prompt rules = 23.
+        assert_eq!(REGISTRY.len(), 23);
 
         // Head: catalogue hygiene (identity + description interleaved).
         assert_eq!(REGISTRY[0].id(), "duplicate_tool_names");

@@ -7,14 +7,16 @@
 //! user flow. These rules mirror the shape of the tool-identity and
 //! tool-description families but operate on [`NormalizedServer::prompts`].
 //!
-//! Seven rules live here, split between identity (`prompt_duplicate_name`,
-//! `prompt_name_not_snake_case`, `prompt_duplicate_argument_name`) and
-//! description (`prompt_missing_description`,
-//! `prompt_description_too_short`, `prompt_description_matches_name`,
+//! Six rules live here, split between identity (`prompt_duplicate_name`,
+//! `prompt_duplicate_argument_name`) and description
+//! (`prompt_missing_description`, `prompt_description_too_short`,
+//! `prompt_description_matches_name`,
 //! `prompt_argument_missing_description`). Conformance-critical rules
 //! (duplicate names and argument names) fall in [`ScoreBucket::Conformance`];
-//! the rest are hygiene in [`ScoreBucket::Metadata`] or ergonomics for
-//! naming.
+//! the rest are hygiene in [`ScoreBucket::Metadata`]. Prompt naming is
+//! deliberately not linted: the MCP spec puts no casing or regex
+//! constraint on `name`, so snake_case checks would be opinion, not
+//! conformance.
 
 use std::collections::BTreeMap;
 
@@ -93,7 +95,9 @@ impl Rule for DuplicatePromptNames {
 // --- prompt_missing_description ------------------------------------------
 
 /// Rule: `prompt_missing_description`. Fires when a prompt has no
-/// description or the description is empty after trimming.
+/// description or the description is empty after trimming. The MCP spec
+/// marks `description` as optional, so this is catalogue-hygiene, not
+/// conformance — matching the tool-side `missing_tool_description`.
 pub struct MissingPromptDescription;
 
 impl Rule for MissingPromptDescription {
@@ -107,7 +111,7 @@ impl Rule for MissingPromptDescription {
         "Prompts without descriptions force the agent to guess intent from the name alone."
     }
     fn severity(&self) -> Severity {
-        Severity::Error
+        Severity::Warning
     }
     fn category(&self) -> FindingCategory {
         FindingCategory::PromptDescription
@@ -214,73 +218,6 @@ impl Rule for PromptDescriptionMatchesName {
         }
         findings
     }
-}
-
-// --- prompt_name_not_snake_case ------------------------------------------
-
-/// Rule: `prompt_name_not_snake_case`. MCP prompt names are addressed by
-/// clients as opaque identifiers; snake_case is the universal convention
-/// across the ecosystem. Flags names containing uppercase letters,
-/// hyphens, dots, spaces, or other non-`[a-z0-9_]` characters — and also
-/// names starting with a digit, which break most clients that derive an
-/// identifier from the prompt name.
-pub struct PromptNameNotSnakeCase;
-
-impl Rule for PromptNameNotSnakeCase {
-    fn id(&self) -> &'static str {
-        "prompt_name_not_snake_case"
-    }
-    fn title(&self) -> &'static str {
-        "Prompt name not snake_case"
-    }
-    fn rationale(&self) -> &'static str {
-        "Prompt names should match `[a-z][a-z0-9_]*` to stay compatible with client-side identifier derivations."
-    }
-    fn severity(&self) -> Severity {
-        Severity::Warning
-    }
-    fn category(&self) -> FindingCategory {
-        FindingCategory::PromptIdentity
-    }
-    fn risk_category(&self) -> RiskCategory {
-        RiskCategory::MetadataHygiene
-    }
-    fn bucket(&self) -> ScoreBucket {
-        ScoreBucket::Ergonomics
-    }
-    fn tags(&self) -> &'static [&'static str] {
-        &["prompts", "identity", "naming"]
-    }
-
-    fn evaluate(&self, server: &NormalizedServer) -> Vec<Finding> {
-        let mut findings = Vec::new();
-        for prompt in &server.prompts {
-            if is_snake_case_identifier(&prompt.name) {
-                continue;
-            }
-            findings.push(self.make_prompt_finding(
-                format!(
-                    "Prompt name {} does not match the `[a-z][a-z0-9_]*` snake_case convention.",
-                    single_quoted_repr(&prompt.name)
-                ),
-                vec![format!("prompt_name={}", prompt.name)],
-                Some(prompt.name.clone()),
-                BTreeMap::new(),
-            ));
-        }
-        findings
-    }
-}
-
-fn is_snake_case_identifier(name: &str) -> bool {
-    let mut chars = name.chars();
-    let Some(first) = chars.next() else {
-        return false;
-    };
-    if !(first.is_ascii_lowercase() || first == '_') {
-        return false;
-    }
-    chars.all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_')
 }
 
 // --- prompt_duplicate_argument_name --------------------------------------
@@ -617,35 +554,6 @@ mod tests {
         assert!(PromptArgumentMissingDescription
             .evaluate(&server)
             .is_empty());
-    }
-
-    #[test]
-    fn name_not_snake_case_detects_common_offenders() {
-        let mut server = NormalizedServer::new("test");
-        for (name, expected) in [
-            ("good_name", None),
-            ("also_good1", None),
-            ("CamelCase", Some("CamelCase")),
-            ("kebab-case", Some("kebab-case")),
-            ("with.dot", Some("with.dot")),
-            ("with space", Some("with space")),
-            ("1starts_with_digit", Some("1starts_with_digit")),
-        ] {
-            server
-                .prompts
-                .push(prompt(name, Some("description text long enough")));
-            let findings = PromptNameNotSnakeCase.evaluate(&server);
-            match expected {
-                Some(n) => {
-                    assert_eq!(findings.last().unwrap().prompt_name.as_deref(), Some(n));
-                }
-                None => {
-                    assert!(findings
-                        .iter()
-                        .all(|f| f.prompt_name.as_deref() != Some(name)));
-                }
-            }
-        }
     }
 
     #[test]

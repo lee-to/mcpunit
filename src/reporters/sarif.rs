@@ -352,7 +352,7 @@ mod tests {
         let rules = parsed["runs"][0]["tool"]["driver"]["rules"]
             .as_array()
             .unwrap();
-        assert_eq!(rules.len(), 24);
+        assert_eq!(rules.len(), 23);
     }
 
     #[test]
