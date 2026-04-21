@@ -1,7 +1,7 @@
 # mcpunit Audit — mcpunit demo server
 
-**Total score:** `0 / 100`  
-**Findings:** 9 (error: 2, warning: 7, info: 0)  
+**Total score:** `10 / 100`  
+**Findings:** 9 (error: 2, warning: 5, info: 2)  
 **Tools discovered:** 4
 
 ## Category Scores
@@ -11,7 +11,7 @@
 | conformance | 90/100 | 1 | 10 |
 | security | 60/100 | 2 | 40 |
 | ergonomics | 60/100 | 4 | 40 |
-| metadata | 80/100 | 2 | 20 |
+| metadata | 100/100 | 2 | 0 |
 
 ## Findings By Bucket
 
@@ -27,14 +27,14 @@
 - **WARNING** `vague_tool_description` `[tool:do_it]`: Tool 'do_it' uses a vague description that does not explain its behavior clearly.
 - **WARNING** `write_tool_without_scope_hint` `[tool:write_file]`: Tool 'write_file' modifies the filesystem without any visible scope hint.
 
-### metadata (2 findings, penalty: 20)
-
-- **WARNING** `prompt_missing_description` `[prompt:summarize]`: Prompt 'summarize' has no description.
-- **WARNING** `prompt_argument_missing_description` `[prompt:translate]`: Prompt 'translate' has 1 argument(s) without description.
-
 ### conformance (1 finding, penalty: 10)
 
 - **WARNING** `schema_allows_arbitrary_properties` `[tool:debug_payload]`: Tool 'debug_payload' allows arbitrary additional input properties.
+
+### metadata (2 findings, penalty: 0)
+
+- **INFO** `prompt_missing_description` `[prompt:summarize]`: Prompt 'summarize' has no description.
+- **INFO** `prompt_argument_missing_description` `[prompt:translate]`: Prompt 'translate' has 1 argument(s) without description.
 
 ## Limitations
 

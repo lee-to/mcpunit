@@ -255,10 +255,10 @@ Quick reference:
 | 17 | `response_too_large` | `WARNING` / `ERROR` | ergonomics |
 | 18 | `prompt_duplicate_name` | `ERROR` | conformance |
 | 19 | `prompt_duplicate_argument_name` | `ERROR` | conformance |
-| 20 | `prompt_missing_description` | `WARNING` | metadata |
-| 21 | `prompt_description_too_short` | `WARNING` | metadata |
-| 22 | `prompt_description_matches_name` | `WARNING` | metadata |
-| 23 | `prompt_argument_missing_description` | `WARNING` | metadata |
+| 20 | `prompt_missing_description` | `INFO` | metadata |
+| 21 | `prompt_description_too_short` | `INFO` | metadata |
+| 22 | `prompt_description_matches_name` | `INFO` | metadata |
+| 23 | `prompt_argument_missing_description` | `INFO` | metadata |
 
 Deep dive by category follows.
 
@@ -532,17 +532,21 @@ by name when invoking `prompts/get`. Duplicates silently overwrite
 each other, and the call fails or returns garbage. The MCP spec
 implies per-prompt argument uniqueness; this rule enforces it.
 
-#### `prompt_missing_description` — `WARNING`
+#### `prompt_missing_description` — `INFO`
 
 **What it catches.** Prompts with no `description` field, or one that
 is empty after trimming.
 
-**Why it matters.** The MCP spec marks `description` as optional, so
-this is hygiene rather than conformance — but without a description
-the agent has only the prompt name to infer intent from, the same
-blind-guessing problem `missing_tool_description` flags for tools.
+**Why it matters.** The MCP spec (2025-11-25) explicitly marks
+`Prompt.description` as *Optional*, so omitting it is spec-valid. The
+rule still surfaces the absence as an advisory — without a description
+the agent has only the prompt name to infer intent — but severity is
+`INFO`, which carries no score penalty. Contrast with
+`missing_tool_description`, where the spec does **not** mark
+`Tool.description` as optional (compare its wording with the explicitly
+*"Optional"* `Tool.title`), so that rule stays `WARNING`.
 
-#### `prompt_description_too_short` — `WARNING`
+#### `prompt_description_too_short` — `INFO`
 
 **What it catches.** Non-empty descriptions shorter than 20
 characters — the length at which hand-written descriptions typically
@@ -550,12 +554,15 @@ stop being one-word stubs like `"Summarise."`.
 
 **Why it matters.** Agents pick a prompt by reading the description.
 Anything shorter than a short sentence carries almost no signal
-beyond the name itself.
+beyond the name itself. Severity is `INFO` because the MCP spec sets
+no minimum length, and since an empty description is already
+spec-valid (and only surfaced as `INFO`), a short-but-present one
+cannot reasonably be stricter.
 
 **How to fix:** write one sentence that says what the prompt produces
 and when to use it.
 
-#### `prompt_description_matches_name` — `WARNING`
+#### `prompt_description_matches_name` — `INFO`
 
 **What it catches.** Descriptions that are literally the prompt name
 after case/punctuation normalisation. `translate` with description
@@ -563,9 +570,12 @@ after case/punctuation normalisation. `translate` with description
 target language."` does not.
 
 **Why it matters.** A restated name is a stub. The model learns
-nothing from it that the name itself did not already carry.
+nothing from it that the name itself did not already carry. Severity
+is `INFO` because the MCP spec does not require descriptions to
+differ from names (nor does it require descriptions at all), so this
+is advisory only — zero score penalty.
 
-#### `prompt_argument_missing_description` — `WARNING`
+#### `prompt_argument_missing_description` — `INFO`
 
 **What it catches.** Any declared argument whose `description` field
 is missing or empty. One finding per offending prompt (with the full
@@ -575,7 +585,9 @@ list of bad arguments in evidence), not one per argument.
 against a mental model of what it is for. Undocumented arguments
 force it to guess from the name alone — which is unreliable exactly
 when the prompt mixes several string fields with overlapping vocab
-(e.g. `source`, `target`, `destination`).
+(e.g. `source`, `target`, `destination`). The MCP spec does not
+mark `PromptArgument.description` as required, so severity is `INFO`
+(advisory only, zero score penalty).
 
 ## 📄 What the reports look like
 
