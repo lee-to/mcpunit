@@ -1,6 +1,6 @@
-Generator: mcpunit (mcpunit 1.3.0)
+Generator: mcpunit (mcpunit 1.4.0)
 Report Schema: https://mcpunit.cutcode.dev/schema/audit/v1@1
-Scan Timestamp: 2026-04-21T08:03:53.415873+00:00
+Scan Timestamp: 2026-04-23T08:26:32.039755+00:00
 Server: mcpunit demo server
 Version: 0.1.0
 Target: stdio:["./target/release/examples/demo"]

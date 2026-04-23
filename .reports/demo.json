@@ -4,11 +4,11 @@
     "version": "1",
     "generator": {
       "name": "mcpunit",
-      "version": "1.3.0"
+      "version": "1.4.0"
     }
   },
   "test": {
-    "timestamp": "2026-04-21T08:03:53.415873+00:00",
+    "timestamp": "2026-04-23T08:26:32.039755+00:00",
     "target": {
       "raw": "stdio:[\"./target/release/examples/demo\"]",
       "transport": "stdio",
