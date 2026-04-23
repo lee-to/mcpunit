@@ -66,7 +66,7 @@ impl Rule for MissingType {
                 .as_object()
                 .map(|o| o.is_empty())
                 .unwrap_or(true);
-            if is_empty && !looks_like_inputful_tool(&tool.name, tool.description.as_deref()) {
+            if is_empty && !looks_like_inputful_tool(&tool.name) {
                 continue;
             }
             let message = format!(
@@ -210,14 +210,14 @@ fn weak_input_reasons(tool: &NormalizedTool) -> Vec<String> {
     }
 
     let Some(properties) = schema_properties(&tool.input_schema) else {
-        if looks_like_inputful_tool(&tool.name, tool.description.as_deref()) {
+        if looks_like_inputful_tool(&tool.name) {
             return vec!["matched_heuristic=inputful_tool_with_empty_object_schema".to_string()];
         }
         return Vec::new();
     };
 
     if properties.is_empty() {
-        if looks_like_inputful_tool(&tool.name, tool.description.as_deref()) {
+        if looks_like_inputful_tool(&tool.name) {
             return vec!["matched_heuristic=inputful_tool_with_empty_object_schema".to_string()];
         }
         return Vec::new();
@@ -421,6 +421,28 @@ mod tests {
     }
 
     // WeakInput
+
+    #[test]
+    fn weak_input_skips_no_arg_tool_with_domain_request_in_description() {
+        // Regression for https://github.com/lee-to/mcpunit/issues/3:
+        // a Russian-language description containing the domain phrase
+        // "Merge Request" used to match the `request` inputful marker via
+        // description, firing `weak_input_schema` on a tool that
+        // deliberately declares no inputs.
+        let mut server = NormalizedServer::new("test");
+        server.tools.push(with_schema(
+            "list_gitlab_projects",
+            Some(
+                "Возвращает список доступных GitLab-проектов. Используйте, \
+                 когда нужно подобрать `projectId` и имя проекта перед \
+                 следующими операциями с Merge Request, файлами или \
+                 другими GitLab-методами.",
+            ),
+            serde_json::json!({"type": "object"}),
+        ));
+        assert!(WeakInput.evaluate(&server).is_empty());
+        assert!(MissingType.evaluate(&server).is_empty());
+    }
 
     #[test]
     fn weak_input_fires_on_empty_object_for_inputful_tool() {

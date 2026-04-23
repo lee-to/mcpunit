@@ -217,23 +217,26 @@ pub fn has_scope_hint(description: Option<&str>, schema: &Value) -> bool {
     false
 }
 
-/// Return whether the tool name or description contains any inputful
-/// marker (input, payload, send, submit, ...).
+/// Return whether the tool **name** contains any inputful marker (input,
+/// payload, send, submit, ...).
 ///
-/// Matches on **whole alphanumeric tokens**, not substrings — otherwise a
-/// description like `"Get workspace metadata"` would match the `data`
-/// marker inside `metadata` and produce a spurious
-/// `weak_input_schema` / `schema_too_lax` finding on a tool that has a
-/// deliberately empty-but-strict schema (see
-/// https://github.com/lee-to/mcpunit/issues — reported against the
-/// `workspace_context` tool in a real MCP server).
-pub fn looks_like_inputful_tool(name: &str, description: Option<&str>) -> bool {
-    let mut haystack = name.trim().to_ascii_lowercase();
-    let desc_lower = normalize_text(description);
-    if !desc_lower.is_empty() {
-        haystack.push(' ');
-        haystack.push_str(&desc_lower);
-    }
+/// Matches on **whole alphanumeric tokens** in the tool name only — not in
+/// the description. Descriptions are free-form prose where domain words
+/// like `Merge Request`, `SQL query`, or `response body` collide with
+/// markers and produce spurious `weak_input_schema` / `missing_schema_type`
+/// findings on tools that deliberately declare no inputs. The tool name,
+/// by contrast, is a compact developer-controlled identifier, so a marker
+/// appearing there is a far stronger signal that the tool accepts
+/// free-form input. Regressions that motivated this scoping:
+///
+/// * `workspace_context` with description "Get workspace metadata..." used
+///   to match the `data` marker as a substring of `metadata`
+///   (<https://github.com/lee-to/mcpunit/issues>).
+/// * A GitLab projects listing tool with description containing
+///   `Merge Request` used to match the `request` marker despite declaring
+///   no inputs (<https://github.com/lee-to/mcpunit/issues/3>).
+pub fn looks_like_inputful_tool(name: &str) -> bool {
+    let haystack = name.trim().to_ascii_lowercase();
     let tokens: HashSet<String> = alnum_tokens(&haystack).into_iter().collect();
     INPUTFUL_TOOL_MARKERS.iter().any(|m| tokens.contains(*m))
 }
@@ -376,35 +379,27 @@ mod tests {
     }
 
     #[test]
-    fn looks_like_inputful_tool_matches_name_or_description() {
-        assert!(looks_like_inputful_tool("submit_form", None));
-        assert!(looks_like_inputful_tool("any", Some("send a payload")));
-        assert!(!looks_like_inputful_tool("abc", Some("static")));
+    fn looks_like_inputful_tool_matches_on_name_only() {
+        assert!(looks_like_inputful_tool("submit_form"));
+        assert!(looks_like_inputful_tool("send_payload"));
+        assert!(!looks_like_inputful_tool("abc"));
+        // Description content must not influence the decision — prose is
+        // too noisy a signal (see GitHub issue #3).
+        assert!(!looks_like_inputful_tool("list_gitlab_projects"));
     }
 
     #[test]
     fn looks_like_inputful_tool_requires_whole_token_match() {
         // Regression: previously `"metadata".contains("data")` would match
         // the `data` marker as a substring and spuriously flag tools with
-        // a deliberately empty-but-strict schema — observed on the
-        // `workspace_context` tool of a real MCP server whose description
-        // reads "Get workspace metadata...". Whole-token matching must
-        // reject substring hits while still catching legitimate inputful
-        // markers that appear as their own words.
-        assert!(!looks_like_inputful_tool(
-            "workspace_context",
-            Some("Get workspace metadata: projects, groups, shared items list"),
-        ));
+        // a deliberately empty-but-strict schema. Whole-token matching
+        // must reject substring hits while still catching legitimate
+        // inputful markers that appear as their own tokens.
+        assert!(!looks_like_inputful_tool("workspace_context"));
         // `database` contains `data` as substring; must not match either.
-        assert!(!looks_like_inputful_tool(
-            "connect_database",
-            Some("Establish a database connection"),
-        ));
+        assert!(!looks_like_inputful_tool("connect_database"));
         // Sanity: legitimate token matches still fire.
-        assert!(looks_like_inputful_tool(
-            "post_message",
-            Some("Send a body to the endpoint"),
-        ));
+        assert!(looks_like_inputful_tool("send_body"));
     }
 
     #[test]
