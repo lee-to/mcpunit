@@ -6,6 +6,9 @@ Cargo.lock.bak
 *.profdata
 tarpaulin-report.*
 
+# --- Python examples ------------------------------------------------------
+__pycache__/
+
 # --- Release / packaging --------------------------------------------------
 /dist/
 /pkg/

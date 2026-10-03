@@ -51,6 +51,12 @@ jobs:
       - run: cargo test --all-features --all-targets
       - name: doc tests
         run: cargo test --all-features --doc
+      - name: Build CLI for behavioral evidence example
+        if: runner.os == 'Linux'
+        run: cargo build --locked --bin mcpunit
+      - name: Verify behavioral evidence example
+        if: runner.os == 'Linux'
+        run: python3 -m unittest discover -s examples/behavioral-evidence -v
 
   audit:
     name: cargo-audit

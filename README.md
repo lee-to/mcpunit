@@ -163,6 +163,13 @@ mcpunit test \
 - `audit.sarif` → drop into GitHub Code Scanning
 - `audit.md` → paste into a PR comment or step summary
 
+A metadata audit does not verify that tools perform their promised
+operations. For a reproducible example that pairs a **100/100 audit** with
+a **failing behavioral assertion**, see
+[Link a metadata audit to behavioral evidence](./examples/behavioral-evidence/).
+It uses a synthetic local server and a separate manifest to connect audit
+reports to independent effect checks for the same revision and configuration.
+
 ### 4. Gate your CI on it
 
 ```bash
@@ -173,7 +180,7 @@ Exit codes you can trust:
 
 | Exit | Meaning |
 |------|---------|
-| `0`  | ✅ Score ≥ `--min-score`. Ship it. |
+| `0`  | ✅ Score ≥ `--min-score`. Metadata quality gate passed. |
 | `2`  | 💥 Test blew up. Server crashed, timeout, bad flags. |
 | `3`  | 📉 Test worked, score is below your threshold. Fix before merge. |
 
