@@ -97,6 +97,49 @@ class CompositionTests(unittest.TestCase):
         self.assert_linked("incomplete")
         self.assertIn("JSON-RPC responses", self.read("behavior.json")["reason"])
 
+    def test_disappearing_journal_finalizes_incomplete_evidence(self):
+        original_check = run.check_behavior
+        original_read = Path.read_text
+        base = self.output
+        for phase in ["before_observation", "after_observation"]:
+            with self.subTest(phase=phase):
+                self.output = base / phase
+
+                def disappearing_fixture(command, cwd, identity, journal, timeout):
+                    def disappearing_read(path, *args, **kwargs):
+                        if path == journal:
+                            path.unlink()
+                        return original_read(path, *args, **kwargs)
+
+                    if phase == "before_observation":
+                        with patch.object(Path, "read_text", new=disappearing_read):
+                            return original_check(command, cwd, identity, journal, timeout)
+                    result = original_check(command, cwd, identity, journal, timeout)
+                    journal.unlink()
+                    return result
+
+                with patch.object(run, "check_behavior", side_effect=disappearing_fixture):
+                    self.assertEqual(run.compose(BINARY, self.output, "working"), 2)
+                manifest = self.read("manifest.json")
+                behavior = self.read("behavior.json")
+                self.assertEqual(manifest["audit"]["total_score"], 100)
+                self.assertEqual(manifest["behavior"]["status"], "incomplete")
+                self.assertEqual(behavior["status"], "incomplete")
+                self.assertIn("effects.jsonl", behavior["reason"])
+                if phase == "before_observation":
+                    self.assertNotIn("during finalization", behavior["reason"])
+                else:
+                    self.assertIn("during finalization", behavior["reason"])
+                self.assertIn("effects.jsonl", behavior["effect_journal"]["reason"])
+                self.assertTrue(behavior["finished_at"])
+                self.assertEqual(behavior["effect_journal"]["path"], "effects.jsonl")
+                self.assertNotIn("sha256", behavior["effect_journal"])
+                self.assertEqual(manifest["behavior"]["run_id"], behavior["run_id"])
+                self.assertEqual(
+                    manifest["behavior"]["report"]["sha256"],
+                    run.digest(self.output / "behavior.json"),
+                )
+
     def test_failed_audit_does_not_start_behavior(self):
         with patch.object(run.subprocess, "run", return_value=subprocess.CompletedProcess(
             [], 2, stdout="", stderr="fixture audit startup error",

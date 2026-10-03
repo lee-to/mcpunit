@@ -113,9 +113,12 @@ below are illustrative placeholders, not recorded evidence):
 
 `behavior.json` repeats the full `subject` and the behavioral `run_id`,
 records a SHA-256 of the fixture code, and references the journal with its
-SHA-256. Paths in artifact references are relative to the manifest's
-directory. The server advertises its source digest as its version; the
-runner verifies that identity in both sessions and checks that the source
+SHA-256 when available. If the journal becomes unavailable, its reference
+records the path and reason without a digest; the runner records `incomplete`
+in the behavioral report and manifest, preserves the original error and a
+completion timestamp, and exits 2. Paths in artifact references are relative
+to the manifest's directory. The server advertises its source digest as its
+version; the runner verifies that identity in both sessions and checks that the source
 has not changed. Configuration digests use UTF-8 encoded
 `json.dumps(configuration, sort_keys=True)` with Python's default separators.
 The configuration includes the mode and absolute journal path; different
@@ -174,5 +177,5 @@ python3 -m unittest discover -s examples/behavioral-evidence -v
 
 The checks cover the negative control, working backend, missing behavior,
 an actual child-process timeout and malformed response producing incomplete
-evidence, an audit startup failure, artifact links, and refusal to overwrite
-earlier runs.
+evidence, a journal disappearing before or after observation, an audit startup
+failure, artifact links, and refusal to overwrite earlier runs.

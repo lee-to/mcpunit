@@ -164,8 +164,13 @@ def compose(binary, output, mode, skip_behavior=False, timeout=5):
             raise ValueError("Server source changed during the behavioral run")
     except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
         behavior.update({"status": "incomplete", "reason": str(error)})
+    try:
+        behavior["effect_journal"] = reference(journal)
+    except OSError as error:
+        behavior["status"] = "incomplete"
+        behavior.setdefault("reason", f"Effect journal unavailable during finalization: {error}")
+        behavior["effect_journal"] = {"path": journal.name, "reason": str(error)}
     behavior["finished_at"] = timestamp()
-    behavior["effect_journal"] = reference(journal)
     write_json(behavior_path, behavior)
     manifest["behavior"].update({
         "status": behavior["status"], "report": reference(behavior_path),
